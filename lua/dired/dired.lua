@@ -10,8 +10,9 @@ local M = {}
 function M.init_dired(history, sp, update_history, from_path)
     -- preserve altbuffer
     local altbuf = vim.fn.bufnr("#")
-    local path = fs.get_absolute_path(vim.fn.expand("%"))
-    vim.api.nvim_buf_set_name(0, path) -- 0 is current buffer
+    local path = fs.get_simplified_path(vim.fn.expand("%"))
+    vim.b.current_dired_path = path
+    vim.api.nvim_buf_set_name(0, fs.get_filename(path)) -- 0 is current buffer
 
     -- Add cursor position calculation here
 
@@ -50,7 +51,9 @@ function M.init_dired(history, sp, update_history, from_path)
         vim.fn.setreg("#", altbuf)
     end
 
-    path = fs.get_parent_path(path)
+    if fs.is_directory(path) ~= true then
+        path = fs.get_parent_path(path)
+    end
     vim.api.nvim_set_current_dir(path)
     display.render(path)
 end
@@ -88,7 +91,7 @@ function M.enter_dir(cmd)
         cmd = "edit"
     end
 
-    local dir = vim.api.nvim_buf_get_name(0)
+    local dir = vim.b.current_dired_path
     local id = display.get_id_from_listing(vim.api.nvim_get_current_line())
     if id == nil then
         vim.api.nvim_err_writeln("Dired: Invalid operation make sure cursor is placed on a file/directory.")
@@ -121,7 +124,7 @@ end
 function M.rename_file(filename)
     local dir = nil
     if filename == nil then
-        dir = vim.api.nvim_buf_get_name(0)
+        dir = vim.b.current_dired_path
     else
         filename = fs.get_simplified_path(fs.get_absolute_path(filename))
         dir = fs.get_parent_path(filename)
@@ -145,7 +148,7 @@ end
 function M.delete_file(filename)
     local dir = nil
     if filename == nil then
-        dir = vim.api.nvim_buf_get_name(0)
+        dir = vim.b.current_dired_path
     else
         filename = fs.get_simplified_path(fs.get_absolute_path(filename))
         dir = fs.get_parent_path(filename)

@@ -41,7 +41,7 @@ end
 
 function M.get_simplified_path(filepath)
     filepath = vim.fn.simplify(vim.fn.fnamemodify(filepath, ":p"))
-    if filepath:sub(-1, -1) == config.path_separator then
+    if filepath:sub(-1, -1) == M.path_separator then
         filepath = vim.fn.fnamemodify(filepath, ":h")
     end
 
@@ -217,7 +217,7 @@ function FsEntry.CreateFile()
 
     if filename:sub(-1, -1) == M.path_separator then
         -- create a directory
-        local dir = vim.api.nvim_buf_get_name(0)
+        local dir = vim.b.current_dired_path
         local fd = vim.loop.fs_mkdir(M.join_paths(dir, filename), default_dir_mode)
 
         if not fd then
@@ -225,7 +225,7 @@ function FsEntry.CreateFile()
             return
         end
     else
-        local dir = vim.api.nvim_buf_get_name(0)
+        local dir = vim.b.current_dired_path
         local fd, err = vim.loop.fs_open(M.join_paths(dir, filename), "w+", default_file_mode)
 
         if not fd then
