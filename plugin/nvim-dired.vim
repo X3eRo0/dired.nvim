@@ -1,12 +1,12 @@
 if exists('g:loaded_dired')
     finish
 endif
-command! -nargs=? -complete=dir Dired lua require'nvim-dired'.open(<q-args>)
-command! -nargs=? -complete=file DiredRename lua require'nvim-dired'.rename(<q-args>)
-command! -nargs=? -complete=file DiredDelete lua require'nvim-dired'.delete(<q-args>)
-command! DiredEnter lua require'nvim-dired'.enter()
-command! DiredCreate lua require'nvim-dired'.create()
-command! DiredQuit lua require'nvim-dired'.quit()
+command! -nargs=? -complete=dir Dired lua require'dired'.open(<q-args>)
+command! -nargs=? -complete=file DiredRename lua require'dired'.rename(<q-args>)
+command! -nargs=? -complete=file DiredDelete lua require'dired'.delete(<q-args>)
+command! DiredEnter lua require'dired'.enter()
+command! DiredCreate lua require'dired'.create()
+command! DiredQuit lua require'dired'.quit()
 
 
 noremap <unique> <Plug>(dired_up) <cmd>execute 'Dired ..'<cr>
@@ -27,9 +27,9 @@ autocmd FileType dired nnoremap <buffer> D <Plug>(dired_delete)
 
 augroup dired
     autocmd!
-    " Makes editing a directory open a nvim-dired. We always re-init the dired
+    " Makes editing a directory open a dired. We always re-init the dired
     autocmd BufEnter * if isdirectory(expand('%')) && !&modified
-          \ | execute 'lua require"nvim-dired".init(vim.b.dirbuf_history, vim.b.dirbuf_history_index, true)'
+          \ | execute 'lua require"dired".init(vim.b.dirbuf_history, vim.b.dirbuf_history_index, true)'
           \ | endif
     " Netrw hijacking for vim-plug and &rtp friends
     autocmd VimEnter * if exists('#FileExplorer') | execute 'autocmd! FileExplorer *' | endif
