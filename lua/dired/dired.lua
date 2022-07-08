@@ -10,7 +10,7 @@ local M = {}
 function M.init_dired(history, sp, update_history, from_path)
     -- preserve altbuffer
     local altbuf = vim.fn.bufnr("#")
-    local path = vim.fn.expand("%")
+    local path = fs.get_absolute_path(vim.fn.expand("%"))
     vim.api.nvim_buf_set_name(0, path) -- 0 is current buffer
 
     -- Add cursor position calculation here
