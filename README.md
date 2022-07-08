@@ -2,6 +2,8 @@
 
 A file browser inspired from Emacs Dired for neovim.
 
+![image](https://user-images.githubusercontent.com/24680989/177937233-f081d292-0936-4a93-9355-57e0ff4253ac.png)
+
 ## Installation
 
 Requires [Neovim 0.6](https://github.com/neovim/neovim/releases/tag/v0.6.0) or
