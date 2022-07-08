@@ -63,6 +63,23 @@ function M.getgroupname(gid)
     return nil
 end
 
+function M.get_short_size(size)
+    local size_units = {
+        "B ",
+        "KB",
+        "MB",
+        "GB",
+        "TB"
+    }
+    local idx = 1
+    while size > 1024 and idx < 5 do
+        size = size / 1024
+        idx = idx + 1
+    end
+
+    return string.format("%7.1f %s", size, size_units[idx])
+end
+
 function M.bitand(a, b)
     local r, m, s = 0, 2 ^ 31, 0
     repeat

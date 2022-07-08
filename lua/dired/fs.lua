@@ -32,7 +32,11 @@ end
 
 -- get filename from absolute path
 function M.get_filename(filepath)
-    return filepath:match("^.+" .. M.path_separator .. "(.+)$")
+    local fname = filepath:match("^.+" .. M.path_separator .. "(.+)$")
+    if fname == nil then
+        fname = string.sub(filepath, 2, #filepath)
+    end
+    return fname
 end
 
 function M.get_simplified_path(filepath)
@@ -114,23 +118,6 @@ local function get_formatted_time(stat)
     return ftime
 end
 
-local function get_short_size(size)
-    local size_units = {
-        "B ",
-        "KB",
-        "MB",
-        "GiB",
-        "TB"
-    }
-    local idx = 1
-    while size > 1024 and idx < 5 do
-        size = size / 1024
-        idx = idx + 1
-    end
-
-    return string.format("%7.1f %s", size, size_units[idx])
-end
-
 local function get_type_and_access_str(fs_t)
     local filetype = "-"
     if fs_t.filetype == "directory" then
@@ -203,18 +190,13 @@ function FsEntry.Format(fs_t)
     local access_str = get_type_and_access_str(fs_t)
     local nlinks = fs_t.nlinks
 
-    local size = get_short_size(fs_t.size)
+    local size = ut.get_short_size(fs_t.size)
+    local filename = fs_t.filename
+    if fs_t.filetype == "directory" then
+        filename = filename .. "/"
+    end
 
-    return string.format(
-        "%-4d %s %5d %10s %s %s %s",
-        fs_t.id,
-        access_str,
-        nlinks,
-        fs_t.user,
-        size,
-        fs_t.time,
-        fs_t.filename
-    )
+    return string.format("%-4d %s %5d %10s %s %s %s", fs_t.id, access_str, nlinks, fs_t.user, size, fs_t.time, filename)
 end
 
 function FsEntry.RenameFile(fs_t)

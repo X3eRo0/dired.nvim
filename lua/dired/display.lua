@@ -50,12 +50,7 @@ function M.get_dired_listing(directory)
     local dir_files = dirs.get_dir_content(directory, config.get("show_hidden"))
     local dir_size = dirs.get_dir_size_by_files(dir_files)
 
-    local size = ""
-    if dir_size > 1024 then
-        size = string.format("%6.1fK", dir_size / 1024)
-    else
-        size = string.format("%7d", dir_size)
-    end
+    local size = utils.get_short_size(dir_size)
 
     -- printing the current directory (ex. "/home/x3ero0:")
     table.insert(buffer_listings, string.format("%s:", vim.fn.fnamemodify(fs.get_simplified_path(directory), ":h")))
