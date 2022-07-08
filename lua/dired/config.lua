@@ -30,6 +30,14 @@ local CONFIG_SPEC = {
             end
         end,
     },
+    show_banner = {
+        default = false,
+        check = function(val)
+            if type(val) ~= "boolean" then
+                return "Must be boolean, instead received " .. type(val)
+            end
+        end,
+    },
     sort_order = {
         default = sort_default,
         check = function(val)
