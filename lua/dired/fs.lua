@@ -1,6 +1,6 @@
 -- functions for fetching files and directories information
-local ut = require("nvim-dired.utils")
-local config = require("nvim-dired.config")
+local ut = require("dired.utils")
+local config = require("dired.config")
 local uv = vim.loop
 
 local M = {}

@@ -1,8 +1,8 @@
 -- display the directory and its contents
-local dirs = require("nvim-dired.dirs")
-local fs = require("nvim-dired.fs")
-local config = require("nvim-dired.config")
-local utils = require("nvim-dired.utils")
+local dirs = require("dired.dirs")
+local fs = require("dired.fs")
+local config = require("dired.config")
+local utils = require("dired.utils")
 local M = {}
 
 -- fill the buffer with directory contents

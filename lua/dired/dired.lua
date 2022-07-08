@@ -1,7 +1,7 @@
-local fs = require("nvim-dired.fs")
-local config = require("nvim-dired.config")
-local display = require("nvim-dired.display")
-local dirs = require("nvim-dired.dirs")
+local fs = require("dired.fs")
+local config = require("dired.config")
+local display = require("dired.display")
+local dirs = require("dired.dirs")
 local uv = vim.loop
 
 local M = {}

@@ -1,6 +1,6 @@
 -- get directory
-local fs = require("nvim-dired.fs")
-local cf = require("nvim-dired.config")
+local fs = require("dired.fs")
+local cf = require("dired.config")
 local uv = vim.loop
 local M = {}
 

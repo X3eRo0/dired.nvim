@@ -1,18 +1,18 @@
--- setup nvim-dired.
+-- setup dired.
 -- Author: X3eRo0
-local config = require("nvim-dired.config")
-local dirs = require("nvim-dired.dirs")
-local disp = require("nvim-dired.display")
-local dired = require("nvim-dired.dired")
+local config = require("dired.config")
+local dirs = require("dired.dirs")
+local disp = require("dired.display")
+local dired = require("dired.dired")
 
 local M = {}
 
 function M.setup(opts)
     local errs = config.update(opts)
     if #errs == 1 then
-        vim.api.nvim_err_writeln("nvim-dired.setup: " .. errs[1])
+        vim.api.nvim_err_writeln("dired.setup: " .. errs[1])
     elseif #errs > 1 then
-        vim.api.nvim_err_writeln("nvim-dired.setup:")
+        vim.api.nvim_err_writeln("dired.setup:")
         for _, err in ipairs(errs) do
             vim.api.nvim_err_writeln("    " .. err)
         end

@@ -13,7 +13,7 @@ higher.
 ### Setup
 You can require this plugin and use it like this.
 ```lua
-require("nvim-dired").setup {
+require("dired").setup {
     path_separator = "/",
     show_hidden = false
 }
