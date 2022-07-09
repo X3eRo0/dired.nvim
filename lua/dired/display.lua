@@ -53,7 +53,7 @@ function M.get_dired_listing(directory)
     local size = utils.get_short_size(dir_size)
 
     -- printing the current directory (ex. "/home/x3ero0:")
-    table.insert(buffer_listings, string.format("%s:", fs.get_simplified_path(directory), ":h"))
+    table.insert(buffer_listings, string.format("%s:", fs.get_simplified_path(directory)))
     table.insert(buffer_listings, string.format("total used in directory %s", size))
     for i, fs_t in ipairs(dir_files) do
         table.insert(buffer_listings, fs.FsEntry.Format(fs_t))

@@ -205,7 +205,7 @@ function FsEntry.RenameFile(fs_t)
     local new_path = M.join_paths(fs_t.parent_dir, new_name)
     local success = vim.loop.fs_rename(old_path, new_path)
     if not success then
-        vim.api.nvim_err_writeln(string.format('DiredRename: Could not rename "%s" to "%s".', fs_t.filename, new_name))
+        vim.notify(string.format('DiredRename: Could not rename "%s" to "%s".', fs_t.filename, new_name))
         return
     end
 end
@@ -218,10 +218,11 @@ function FsEntry.CreateFile()
     if filename:sub(-1, -1) == M.path_separator then
         -- create a directory
         local dir = vim.b.current_dired_path
+        -- print(vim.inspect(M.join_paths(dir, filename)))
         local fd = vim.loop.fs_mkdir(M.join_paths(dir, filename), default_dir_mode)
 
         if not fd then
-            vim.api.nvim_err_writeln(string.format('DiredRename: Could not Directory "%s".', filename))
+            vim.notify(string.format('DiredCreate: Could not create Directory "%s".', filename))
             return
         end
     else
@@ -229,7 +230,7 @@ function FsEntry.CreateFile()
         local fd, err = vim.loop.fs_open(M.join_paths(dir, filename), "w+", default_file_mode)
 
         if not fd then
-            vim.api.nvim_err_writeln(string.format('DiredRename: Could not create file "%s : %s".', filename, err))
+            print(string.format('DiredCreate: Could not create file "%s".', filename))
             return
         end
 
@@ -269,9 +270,8 @@ local function delete_files(path)
 end
 
 function FsEntry.DeleteFile(fs_t)
-    print()
     if fs_t.filename == "." or fs_t.filename == ".." then
-        vim.api.nvim_err_writeln(string.format('Cannot Delete "%s"', fs_t.filepath))
+        vim.notify(string.format('Cannot Delete "%s"', fs_t.filepath), "error")
         return
     end
     local prompt =
@@ -285,9 +285,7 @@ function FsEntry.DeleteFile(fs_t)
             vim.loop.fs_unlink(fs_t.filepath)
         end
     else
-        vim.cmd(
-            'echo "\rFile/Directory not deleted                                                                    "'
-        )
+        vim.notify('DiredDelete: File/Directory not deleted', "error")
     end
 end
 return M

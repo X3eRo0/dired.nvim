@@ -27,5 +27,4 @@ M.init = dired.init_dired
 M.rename = dired.rename_file
 M.create = dired.create_file
 M.delete = dired.delete_file
-
 return M
