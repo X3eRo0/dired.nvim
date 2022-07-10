@@ -9,15 +9,25 @@ A file browser inspired from Emacs Dired for neovim.
 Requires [Neovim 0.6](https://github.com/neovim/neovim/releases/tag/v0.6.0) or
 higher.
 
-* [vim-plug]: `Plug "X3eRo0/dired.nvim"`
-* [packer.nvim]: `use "X3eRo0/dired.nvim"`
+```
+use {
+    "X3eRo0/dired.nvim",
+    requires = "MunifTanjim/nui.nvim",
+    config = function()
+        require("dired").setup {
+            path_separator = "/",
+            show_hidden = true
+        }
+    end
+}
+```
 
 ### Setup
 You can require this plugin and use it like this.
 ```lua
 require("dired").setup {
     path_separator = "/",
-    show_hidden = false
+    show_hidden = true
 }
 ```
 

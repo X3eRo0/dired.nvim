@@ -1,6 +1,8 @@
 -- functions for fetching files and directories information
 local ut = require("dired.utils")
 local config = require("dired.config")
+local nui_text = require("nui.text")
+local hl = require("dired.highlight")
 local uv = vim.loop
 
 local M = {}
@@ -17,7 +19,7 @@ local access_masks = {
     S_IXGRP = 8,
     S_IROTH = 4,
     S_IWOTH = 2,
-    S_IXOTH = 1
+    S_IXOTH = 1,
 }
 
 -- is filepath a directory or just a file
@@ -67,7 +69,7 @@ end
 -- join_paths
 function M.join_paths(...)
     local string_builder = {}
-    for _, path in ipairs({...}) do
+    for _, path in ipairs({ ... }) do
         if path:sub(-1, -1) == M.path_separator then
             path = path:sub(0, -2)
         end
@@ -102,20 +104,23 @@ local function get_formatted_time(stat)
     local cdate = os.date("*t", stat.ctime.sec)
     local tdate = os.date("*t", os.time())
     local show_year = false
+    local sep = nui_text("", hl.NORMAL)
 
     if cdate.year < tdate.year then
         show_year = true
     end
 
     local ftime = nil
+    local month = nui_text(os.date("%6b", stat.ctime.sec), hl.MONTH)
+    local day = nui_text(os.date("%e", stat.ctime.sec), hl.DAY)
 
     if show_year then
-        ftime = os.date("%6b %e %Y  %H:%M", stat.ctime.sec)
+        ftime = nui_text(os.date("%Y  %H:%M", stat.ctime.sec))
     else
-        ftime = os.date("%6b %e %m-%y %H:%M", stat.ctime.sec)
+        ftime = nui_text(os.date("%m-%y %H:%M", stat.ctime.sec))
     end
 
-    return ftime
+    return month, day, ftime
 end
 
 local function get_type_and_access_str(fs_t)
@@ -144,9 +149,15 @@ local function get_type_and_access_str(fs_t)
     local other_write = (ut.bitand(fs_t.mode, access_masks.S_IWOTH) > 0) and "w" or "-"
     local other_exec = (ut.bitand(fs_t.mode, access_masks.S_IXOTH) > 0) and "x" or "-"
 
-    local access_string =
-        filetype ..
-        user_read .. user_write .. user_exec .. group_read .. group_write .. group_exec .. other_read .. other_write
+    local access_string = filetype
+        .. user_read
+        .. user_write
+        .. user_exec
+        .. group_read
+        .. group_write
+        .. group_exec
+        .. other_read
+        .. other_write
 
     -- sticky bit
     if ut.bitand(fs_t.mode, access_masks.S_ISVTX) > 0 then
@@ -179,7 +190,7 @@ function FsEntry.New(id, filepath, parent_dir, filetype)
         gid = stat.gid,
         group = ut.getgroupname(stat.gid).username,
         size = stat.size,
-        time = get_formatted_time(stat)
+        stat = stat,
     }
 
     return fs_t
@@ -187,16 +198,55 @@ end
 
 function FsEntry.Format(fs_t)
     -- format file information like dired
-    local access_str = get_type_and_access_str(fs_t)
-    local nlinks = fs_t.nlinks
-
-    local size = ut.get_short_size(fs_t.size)
-    local filename = fs_t.filename
+    local id = nui_text(string.format("%-4d", fs_t.id), hl.DIM_TEXT)
+    local access_str = nui_text(string.format("%s", get_type_and_access_str(fs_t)), hl.NORMAL)
+    local nlinks = nui_text(string.format("%5d", fs_t.nlinks), hl.DIM_TEXT)
+    local username = nui_text(string.format("%10s", fs_t.user), hl.USERNAME)
+    local size_s, size_u = ut.get_colored_short_size(fs_t.size)
+    local month, day, ftime = get_formatted_time(fs_t.stat)
+    local file = nil
+    local sep = nui_text("", hl.NORMAL)
     if fs_t.filetype == "directory" then
-        filename = filename .. "/"
+        file = nui_text(string.format("%s", fs_t.filename), hl.DIRECTORY_NAME)
+        sep = nui_text(M.path_separator, hl.NORMAL)
+    elseif string.sub(fs_t.filename, 1, 1) == "." then
+        file = nui_text(string.format("%s", fs_t.filename), hl.DOTFILE)
+    else
+        file = nui_text(string.format("%s", fs_t.filename), hl.FILE_NAME)
     end
-
-    return string.format("%-4d %s %5d %10s %s %s %s", fs_t.id, access_str, nlinks, fs_t.user, size, fs_t.time, filename)
+    vim.b.cursor_column = #id._content
+        + #access_str._content
+        + #nlinks._content
+        + #username._content
+        + #size_s._content
+        + #size_u._content
+        + #month._content
+        + #day._content
+        + #ftime._content
+        + 9
+    local sp = nui_text(" ")
+    return {
+        id,
+        sp,
+        access_str,
+        sp,
+        nlinks,
+        sp,
+        username,
+        sp,
+        size_s,
+        sp,
+        size_u,
+        sp,
+        month,
+        sp,
+        day,
+        sp,
+        ftime,
+        sp,
+        file,
+        sep,
+    }
 end
 
 function FsEntry.RenameFile(fs_t)
@@ -285,7 +335,7 @@ function FsEntry.DeleteFile(fs_t)
             vim.loop.fs_unlink(fs_t.filepath)
         end
     else
-        vim.notify('DiredDelete: File/Directory not deleted', "error")
+        vim.notify("DiredDelete: File/Directory not deleted", "error")
     end
 end
 return M

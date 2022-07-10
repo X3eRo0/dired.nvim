@@ -1,9 +1,9 @@
 -- setup dired.
 -- Author: X3eRo0
 local config = require("dired.config")
-local dirs = require("dired.dirs")
-local disp = require("dired.display")
 local dired = require("dired.dired")
+
+require("dired.highlight").setup()
 
 local M = {}
 

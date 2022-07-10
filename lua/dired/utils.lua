@@ -1,6 +1,7 @@
 -- util functions
 local uv = vim.loop
-
+local hl = require("dired.highlight")
+local nui_text = require("nui.text")
 local M = {}
 
 function M.str_split(s, delimiter)
@@ -29,7 +30,7 @@ function M.getpwid(uid)
                 uid = tonumber(passwd_entry[3], 10),
                 gid = tonumber(passwd_entry[4], 10),
                 homedir = passwd_entry[6],
-                shell = passwd_entry[7]
+                shell = passwd_entry[7],
             }
 
             if pwstruct.uid == uid then
@@ -52,7 +53,7 @@ function M.getgroupname(gid)
             local gpstruct = {
                 idx = i,
                 username = group_entry[1],
-                gid = tonumber(group_entry[3], 10)
+                gid = tonumber(group_entry[3], 10),
             }
 
             if gpstruct.gid == gid then
@@ -69,7 +70,7 @@ function M.get_short_size(size)
         "KB",
         "MB",
         "GB",
-        "TB"
+        "TB",
     }
     local idx = 1
     while size > 1024 and idx < 5 do
@@ -77,7 +78,34 @@ function M.get_short_size(size)
         idx = idx + 1
     end
 
-    return string.format("%7.1f %s", size, size_units[idx])
+    if idx == 1 then
+        return string.format("%7d %s", size, size_units[idx])
+    else
+        return string.format("%7.1f %s", size, size_units[idx])
+    end
+end
+
+function M.get_colored_short_size(size)
+    local size_units = {
+        "B ",
+        "KB",
+        "MB",
+        "GB",
+        "TB",
+    }
+    local idx = 1
+    while size > 1024 and idx < 5 do
+        size = size / 1024
+        idx = idx + 1
+    end
+    local s_str = nil
+    if idx == 1 then
+        s_str = nui_text(string.format("%7d", size), hl.SIZE)
+    else
+        s_str = nui_text(string.format("%7.1f", size), hl.SIZE)
+    end
+    local u_str = nui_text(string.format("%s", size_units[idx]), hl.BOLD)
+    return s_str, u_str
 end
 
 function M.bitand(a, b)
