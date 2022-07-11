@@ -12,8 +12,10 @@ function M.get_dir_content(directory, show_hidden)
         return nil, err
     end
 
-    table.insert(dir_files, fs.FsEntry.New(0, fs.join_paths(directory, "."), directory, "directory"))
-    table.insert(dir_files, fs.FsEntry.New(1, fs.join_paths(directory, ".."), directory, "directory"))
+    local cur_dir, _ = fs.FsEntry.New(0, fs.join_paths(directory, "."), directory, "directory")
+    local pre_dir, __ = fs.FsEntry.New(1, fs.join_paths(directory, ".."), directory, "directory")
+    table.insert(dir_files, cur_dir)
+    table.insert(dir_files, pre_dir)
 
     local id = 2
     while true do
@@ -24,7 +26,11 @@ function M.get_dir_content(directory, show_hidden)
 
         if show_hidden or not fs.is_hidden(filename) then
             local filepath = fs.join_paths(directory, filename)
-            local fs_t = fs.FsEntry.New(id, filepath, directory, filetype)
+            local fs_t, errr = fs.FsEntry.New(id, filepath, directory, filetype)
+            if fs_t == nil then
+                vim.notify(string.format("Dired: %s", errr), "error")
+                return nil, err
+            end
             id = id + 1
             table.insert(dir_files, fs_t)
         end

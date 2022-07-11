@@ -174,7 +174,7 @@ function FsEntry.New(id, filepath, parent_dir, filetype)
 
     local stat, err = uv.fs_stat(filepath)
     if stat == nil then
-        return err
+        return nil, err
     end
 
     local fs_t = {
@@ -193,7 +193,7 @@ function FsEntry.New(id, filepath, parent_dir, filetype)
         stat = stat,
     }
 
-    return fs_t
+    return fs_t, err
 end
 
 function FsEntry.Format(fs_t)
