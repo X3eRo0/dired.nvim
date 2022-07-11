@@ -18,18 +18,26 @@ function M.get_dir_content(directory, show_hidden)
     table.insert(dir_files, pre_dir)
 
     local id = 2
+    local show_file = false
     while true do
         local filename, filetype = uv.fs_scandir_next(dirfd)
         if filename == nil then
             break
         end
 
-        if show_hidden or not fs.is_hidden(filename) then
+        show_file = false
+        if fs.is_hidden(filename) and show_hidden then
+            show_file = true
+        elseif not fs.is_hidden(filename) then
+            show_file = true
+        end
+
+        if show_file then
             local filepath = fs.join_paths(directory, filename)
             local fs_t, errr = fs.FsEntry.New(id, filepath, directory, filetype)
             if fs_t == nil then
                 vim.notify(string.format("Dired: %s", errr), "error")
-                return nil, err
+                return nil, errr
             end
             id = id + 1
             table.insert(dir_files, fs_t)

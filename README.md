@@ -18,6 +18,7 @@ use {
     config = function()
         require("dired").setup {
             path_separator = "/",
+            show_banner = false,
             show_hidden = true
         }
     end
@@ -29,6 +30,7 @@ You can require this plugin and use it like this.
 ```lua
 require("dired").setup {
     path_separator = "/",
+    show_banner = false,
     show_hidden = true
 }
 ```

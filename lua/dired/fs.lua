@@ -39,7 +39,7 @@ end
 
 -- is filepath a hidden directory/file
 function M.is_hidden(filepath)
-    return filepath:sub(1, 1) == "."
+    return string.sub(filepath, 1, 1) == "."
 end
 
 -- get filename from absolute path
@@ -183,35 +183,6 @@ local function get_type_and_access_str(fs_t)
     table.insert(access_string, user)
     table.insert(access_string, group)
     table.insert(access_string, other)
-
-    -- local user_read = b_and(fs_t.mode, access_masks.S_IRUSR) and "r" or "-"
-    -- local user_write = b_and(fs_t.mode, access_masks.S_IWUSR) and "w" or "-"
-    -- local user_exec = b_and(fs_t.mode, access_masks.S_IXUSR) and "x" or "-"
-    -- local group_read = b_and(fs_t.mode, access_masks.S_IRGRP) and "r" or "-"
-    -- local group_write = b_and(fs_t.mode, access_masks.S_IWGRP) and "w" or "-"
-    -- local group_exec = b_and(fs_t.mode, access_masks.S_IXGRP) and "x" or "-"
-    -- local other_read = b_and(fs_t.mode, access_masks.S_IROTH) and "r" or "-"
-    -- local other_write = b_and(fs_t.mode, access_masks.S_IWOTH) and "w" or "-"
-    -- local other_exec = b_and(fs_t.mode, access_masks.S_IXOTH) and "x" or "-"
-    --
-    -- local access_string = filetype
-    --     .. user_read
-    --     .. user_write
-    --     .. user_exec
-    --     .. group_read
-    --     .. group_write
-    --     .. group_exec
-    --     .. other_read
-    --     .. other_write
-    --
-    -- -- sticky bit
-    -- if ut.bitand(fs_t.mode, access_masks.S_ISVTX) > 0 then
-    --     return access_string .. "t"
-    -- else
-    --     return access_string .. other_exec
-    -- end
-    --
-    -- return access_string
     return table.concat(access_string)
 end
 
@@ -267,12 +238,15 @@ local function get_formatted_fileinfo(fs_t)
     elseif fs_t.filetype == "link" then
         local link_path = get_symlink(fs_t.filepath)
         local does_link_exists = file_exists(link_path)
+
         if does_link_exists then
             file = nui_text(string.format("%s", fs_t.filename), hl.SYMBOLIC_LINK)
         else
             file = nui_text(string.format("%s", fs_t.filename), hl.BROKEN_LINK)
         end
+
         sep = nui_text(" -> ", hl.NORMAL)
+
         if does_link_exists then
             link = nui_text(string.format("%s", link_path), hl.SYMBOLIC_LINK_TARGET)
         else
@@ -281,9 +255,16 @@ local function get_formatted_fileinfo(fs_t)
     elseif string.sub(fs_t.filename, 1, 1) == "." then
         file = nui_text(string.format("%s", fs_t.filename), hl.DOTFILE)
     else
-        if ut.bitand(fs_t.mode, access_masks.S_IXUSR) > 0 then
+        if
+            (ut.bitand(fs_t.mode, access_masks.S_ISUID) > 0) and (ut.bitand(fs_t.mode, access_masks.S_ISGID) > 0)
+        then
+            file = nui_text(string.format("%s", fs_t.filename), hl.FILE_SUID)
+        elseif
+            (ut.bitand(fs_t.mode, access_masks.S_IXUSR) > 0)
+            and (ut.bitand(fs_t.mode, access_masks.S_IXGRP) > 0)
+            and (ut.bitand(fs_t.mode, access_masks.S_IXOTH) > 0)
+        then
             file = nui_text(string.format("%s", fs_t.filename), hl.FILE_EXECUTABLE)
-        elseif ut.bitand(fs_t.mode, access_masks.S_IXUSR) > 0 then
         else
             file = nui_text(string.format("%s", fs_t.filename), hl.FILE_NAME)
         end
@@ -369,7 +350,7 @@ function FsEntry.CreateFile()
         local fd, err = vim.loop.fs_open(M.join_paths(dir, filename), "w+", default_file_mode)
 
         if not fd then
-            print(string.format('DiredCreate: Could not create file "%s".', filename))
+            vim.notify(string.format('DiredCreate: Could not create file "%s".', filename))
             return
         end
 

@@ -43,9 +43,6 @@ function M.init_dired(history, sp, update_history, from_path)
     vim.bo.bufhidden = "wipe"
     vim.bo.modifiable = true
 
-    if vim.b.dired_show_hidden == nil then
-        vim.b.dired_show_hidden = config.get("show_hidden")
-    end
 
     if altbuf ~= -1 then
         vim.fn.setreg("#", altbuf)

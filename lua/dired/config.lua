@@ -63,11 +63,11 @@ function M.update(opts)
         if val == nil then
             user_config[opt_name] = nil
         else
-            local err, converted = spec.check(val)
-            if err ~= nil then
-                table.insert(errs, string.format("`%s` %s", opt_name, err))
+            local ret = spec.check(val)
+            if type(ret) == "string" then
+                table.insert(errs, string.format("`%s` %s", opt_name, ret))
             else
-                user_config[opt_name] = converted
+                user_config[opt_name] = val
             end
         end
     end
@@ -82,7 +82,6 @@ function M.update(opts)
     if #unrecognised_opts > 0 then
         table.insert(errs, table.concat(unrecognised_opts, ", ") .. "not recognised")
     end
-
     return errs
 end
 

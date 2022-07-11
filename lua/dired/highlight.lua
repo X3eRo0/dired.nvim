@@ -8,6 +8,7 @@ M.DOTFILE = "DiredDotfile"
 M.FADE_TEXT_1 = "DiredFadeText1"
 M.FADE_TEXT_2 = "DiredFadeText2"
 M.FILE_NAME = "DiredFileName"
+M.FILE_SUID = "DiredFileSuid"
 M.FILE_EXECUTABLE = "DiredFileExecutable"
 M.HIDDEN_BY_NAME = "DiredHiddenByName"
 M.NORMAL = "DiredNormal"
@@ -179,6 +180,7 @@ M.setup = function()
     create_highlight_group(M.MONTH, {}, nil, "696969", "bold")
     create_highlight_group(M.DAY, {}, nil, "778899", "bold")
     create_highlight_group(M.FILE_NAME, {}, "NONE", "NONE")
+    create_highlight_group(M.FILE_SUID, {}, "ff6666", "000000", "bold")
     create_highlight_group(M.HIDDEN_BY_NAME, { M.DOTFILE }, nil, nil)
     create_highlight_group(M.NORMAL, { "Normal" })
     create_highlight_group(M.NORMALNC, { "NormalNC", M.NORMAL })
