@@ -36,7 +36,15 @@ end
 function M.get_dir_size_by_files(dir_files)
     local size = 0
     for _, fs_t in ipairs(dir_files) do
-        size = size + fs_t.size
+        if fs_t.size == nil then
+            if fs_t.filename ~= nil then
+                vim.notify(string.format("Dired: %s is causing issues.", fs_t.filename), "warn")
+            else
+                vim.notify("Dired: One of the directory entry is causing issues.", "warn")
+            end
+        else
+            size = size + fs_t.size
+        end
     end
     return size
 end
