@@ -8,6 +8,7 @@ M.DOTFILE = "DiredDotfile"
 M.FADE_TEXT_1 = "DiredFadeText1"
 M.FADE_TEXT_2 = "DiredFadeText2"
 M.FILE_NAME = "DiredFileName"
+M.FILE_EXECUTABLE = "DiredFileExecutable"
 M.HIDDEN_BY_NAME = "DiredHiddenByName"
 M.NORMAL = "DiredNormal"
 M.NORMALNC = "DiredNormalNC"
@@ -16,7 +17,10 @@ M.NORMALBOLD = "DiredNormalBold"
 M.USERNAME = "DiredUsername"
 M.MONTH = "DiredMonth"
 M.DAY = "DiredDay"
+M.SYMBOLIC_LINK = "DiredSymbolicLink"
+M.BROKEN_LINK = "DiredBrokenLink"
 M.SYMBOLIC_LINK_TARGET = "DiredSymbolicLinkTarget"
+M.BROKEN_LINK_TARGET = "DiredBrokenLinkTarget"
 
 local function dec_to_hex(n, chars)
     chars = chars or 6
@@ -179,7 +183,11 @@ M.setup = function()
     create_highlight_group(M.NORMAL, { "Normal" })
     create_highlight_group(M.NORMALNC, { "NormalNC", M.NORMAL })
     create_highlight_group(M.NORMALBOLD, {}, nil, "ffffff", "bold")
-    create_highlight_group(M.SYMBOLIC_LINK_TARGET, { M.FILE_NAME })
+    create_highlight_group(M.SYMBOLIC_LINK, {}, nil, "33ccff", "bold")
+    create_highlight_group(M.SYMBOLIC_LINK_TARGET, {}, "5bd75b", "000000", "bold")
+    create_highlight_group(M.BROKEN_LINK, {}, "2e2e1f", "ff1a1a", "bold")
+    create_highlight_group(M.BROKEN_LINK_TARGET, {}, "2e2e1f", "ff1a1a", "bold")
+    create_highlight_group(M.FILE_EXECUTABLE, {}, nil, "5bd75b", "bold")
 end
 
 return M

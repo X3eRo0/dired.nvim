@@ -10,6 +10,16 @@ local M = {}
 M.path_separator = config.get("path_separator")
 
 local access_masks = {
+    S_IFMT = 61440,
+    S_IFSOCK = 49152,
+    S_IFLNK = 40960,
+    S_IFREG = 32768,
+    S_IFBLK = 24576,
+    S_IFDIR = 16384,
+    S_IFCHR = 8192,
+    S_IFIFO = 4096,
+    S_ISUID = 2048,
+    S_ISGID = 1024,
     S_ISVTX = 512,
     S_IRUSR = 256,
     S_IWUSR = 128,
@@ -123,56 +133,92 @@ local function get_formatted_time(stat)
     return month, day, ftime
 end
 
+function replace_char(pos, str, r)
+    return str:sub(1, pos - 1) .. r .. str:sub(pos + 1)
+end
+
+local function b_and(a, b)
+    return ut.bitand(a, b)
+end
+
 local function get_type_and_access_str(fs_t)
     local filetype = "-"
-    if fs_t.filetype == "directory" then
+    if b_and(fs_t.mode, access_masks.S_IFREG) and fs_t.filetype == "file" then
+        filetype = "-"
+    elseif b_and(fs_t.mode, access_masks.S_IFDIR) and fs_t.filetype == "directory" then
         filetype = "d"
-    elseif fs_t.filetype == "link" then
+    elseif b_and(fs_t.mode, access_masks.S_IFLNK) and fs_t.filetype == "link" then
         filetype = "l"
-    elseif fs_t.filetype == "char" then
+    elseif b_and(fs_t.mode, access_masks.S_IFCHR) and fs_t.filetype == "char" then
         filetype = "c"
-    elseif fs_t.filetype == "block" then
+    elseif b_and(fs_t.mode, access_masks.S_IFBLK) and fs_t.filetype == "block" then
         filetype = "b"
-    elseif fs_t.filetype == "fifo" then
+    elseif b_and(fs_t.mode, access_masks.S_IFIFO) and fs_t.filetype == "fifo" then
         filetype = "p"
-    elseif fs_t.filetype == "socket" then
+    elseif b_and(fs_t.mode, access_masks.S_IFSOCK) and fs_t.filetype == "socket" then
         filetype = "s"
     end
 
-    local user_read = (ut.bitand(fs_t.mode, access_masks.S_IRUSR) > 0) and "r" or "-"
-    local user_write = (ut.bitand(fs_t.mode, access_masks.S_IWUSR) > 0) and "w" or "-"
-    local user_exec = (ut.bitand(fs_t.mode, access_masks.S_IXUSR) > 0) and "x" or "-"
-    local group_read = (ut.bitand(fs_t.mode, access_masks.S_IRGRP) > 0) and "r" or "-"
-    local group_write = (ut.bitand(fs_t.mode, access_masks.S_IWGRP) > 0) and "w" or "-"
-    local group_exec = (ut.bitand(fs_t.mode, access_masks.S_IXGRP) > 0) and "x" or "-"
-    local other_read = (ut.bitand(fs_t.mode, access_masks.S_IROTH) > 0) and "r" or "-"
-    local other_write = (ut.bitand(fs_t.mode, access_masks.S_IWOTH) > 0) and "w" or "-"
-    local other_exec = (ut.bitand(fs_t.mode, access_masks.S_IXOTH) > 0) and "x" or "-"
+    local rwx = { "---", "--x", "-w-", "-wx", "r--", "r-x", "rw-", "rwx" }
+    local access_string = {}
 
-    local access_string = filetype
-        .. user_read
-        .. user_write
-        .. user_exec
-        .. group_read
-        .. group_write
-        .. group_exec
-        .. other_read
-        .. other_write
+    -- set filetype
+    table.insert(access_string, filetype)
+    local user = rwx[1 + b_and(fs_t.mode / 64, 7)]
+    local group = rwx[1 + b_and(fs_t.mode / 8, 7)]
+    local other = rwx[1 + b_and(fs_t.mode, 7)]
 
-    -- sticky bit
-    if ut.bitand(fs_t.mode, access_masks.S_ISVTX) > 0 then
-        return access_string .. "t"
-    else
-        return access_string .. other_exec
+    if b_and(fs_t.mode, access_masks.S_ISUID) > 0 then
+        user = replace_char(3, user, (b_and(fs_t.mode, access_masks.S_IXUSR) > 0) and "s" or "S")
     end
 
-    return access_string
+    if b_and(fs_t.mode, access_masks.S_ISGID) > 0 then
+        group = replace_char(3, group, (b_and(fs_t.mode, access_masks.S_IXGRP) > 0) and "s" or "l")
+    end
+
+    if b_and(fs_t.mode, access_masks.S_ISVTX) > 0 then
+        other = replace_char(3, other, (b_and(fs_t.mode, access_masks.S_IXOTH) > 0) and "t" or "T")
+    end
+
+    table.insert(access_string, user)
+    table.insert(access_string, group)
+    table.insert(access_string, other)
+
+    -- local user_read = b_and(fs_t.mode, access_masks.S_IRUSR) and "r" or "-"
+    -- local user_write = b_and(fs_t.mode, access_masks.S_IWUSR) and "w" or "-"
+    -- local user_exec = b_and(fs_t.mode, access_masks.S_IXUSR) and "x" or "-"
+    -- local group_read = b_and(fs_t.mode, access_masks.S_IRGRP) and "r" or "-"
+    -- local group_write = b_and(fs_t.mode, access_masks.S_IWGRP) and "w" or "-"
+    -- local group_exec = b_and(fs_t.mode, access_masks.S_IXGRP) and "x" or "-"
+    -- local other_read = b_and(fs_t.mode, access_masks.S_IROTH) and "r" or "-"
+    -- local other_write = b_and(fs_t.mode, access_masks.S_IWOTH) and "w" or "-"
+    -- local other_exec = b_and(fs_t.mode, access_masks.S_IXOTH) and "x" or "-"
+    --
+    -- local access_string = filetype
+    --     .. user_read
+    --     .. user_write
+    --     .. user_exec
+    --     .. group_read
+    --     .. group_write
+    --     .. group_exec
+    --     .. other_read
+    --     .. other_write
+    --
+    -- -- sticky bit
+    -- if ut.bitand(fs_t.mode, access_masks.S_ISVTX) > 0 then
+    --     return access_string .. "t"
+    -- else
+    --     return access_string .. other_exec
+    -- end
+    --
+    -- return access_string
+    return table.concat(access_string)
 end
 
 function FsEntry.New(id, filepath, parent_dir, filetype)
     -- create a file entry
 
-    local stat, err = uv.fs_stat(filepath)
+    local stat, err = uv.fs_lstat(filepath)
     if stat == nil then
         return nil, err
     end
@@ -196,6 +242,56 @@ function FsEntry.New(id, filepath, parent_dir, filetype)
     return fs_t, err
 end
 
+local function file_exists(filepath)
+    local stat, err = vim.loop.fs_lstat(filepath)
+    if stat == nil and err ~= nil then
+        return false
+    end
+    return true
+end
+
+local function get_symlink(filepath)
+    local link = vim.loop.fs_readlink(filepath)
+    if not link then
+        return nil
+    end
+    return link
+end
+
+local function get_formatted_fileinfo(fs_t)
+    local file, sep, link = nil, nil, nil
+    sep = nui_text("", hl.NORMAL)
+    if fs_t.filetype == "directory" then
+        file = nui_text(string.format("%s", fs_t.filename), hl.DIRECTORY_NAME)
+        sep = nui_text(M.path_separator, hl.NORMAL)
+    elseif fs_t.filetype == "link" then
+        local link_path = get_symlink(fs_t.filepath)
+        local does_link_exists = file_exists(link_path)
+        if does_link_exists then
+            file = nui_text(string.format("%s", fs_t.filename), hl.SYMBOLIC_LINK)
+        else
+            file = nui_text(string.format("%s", fs_t.filename), hl.BROKEN_LINK)
+        end
+        sep = nui_text(" -> ", hl.NORMAL)
+        if does_link_exists then
+            link = nui_text(string.format("%s", link_path), hl.SYMBOLIC_LINK_TARGET)
+        else
+            link = nui_text(string.format("%s", link_path), hl.BROKEN_LINK_TARGET)
+        end
+    elseif string.sub(fs_t.filename, 1, 1) == "." then
+        file = nui_text(string.format("%s", fs_t.filename), hl.DOTFILE)
+    else
+        if ut.bitand(fs_t.mode, access_masks.S_IXUSR) > 0 then
+            file = nui_text(string.format("%s", fs_t.filename), hl.FILE_EXECUTABLE)
+        elseif ut.bitand(fs_t.mode, access_masks.S_IXUSR) > 0 then
+        else
+            file = nui_text(string.format("%s", fs_t.filename), hl.FILE_NAME)
+        end
+    end
+
+    return file, sep, link
+end
+
 function FsEntry.Format(fs_t)
     -- format file information like dired
     local id = nui_text(string.format("%-4d", fs_t.id), hl.DIM_TEXT)
@@ -204,16 +300,8 @@ function FsEntry.Format(fs_t)
     local username = nui_text(string.format("%10s", fs_t.user), hl.USERNAME)
     local size_s, size_u = ut.get_colored_short_size(fs_t.size)
     local month, day, ftime = get_formatted_time(fs_t.stat)
-    local file = nil
-    local sep = nui_text("", hl.NORMAL)
-    if fs_t.filetype == "directory" then
-        file = nui_text(string.format("%s", fs_t.filename), hl.DIRECTORY_NAME)
-        sep = nui_text(M.path_separator, hl.NORMAL)
-    elseif string.sub(fs_t.filename, 1, 1) == "." then
-        file = nui_text(string.format("%s", fs_t.filename), hl.DOTFILE)
-    else
-        file = nui_text(string.format("%s", fs_t.filename), hl.FILE_NAME)
-    end
+    local file, sep, link = get_formatted_fileinfo(fs_t)
+
     vim.b.cursor_column = #id._content
         + #access_str._content
         + #nlinks._content
@@ -246,6 +334,7 @@ function FsEntry.Format(fs_t)
         sp,
         file,
         sep,
+        link,
     }
 end
 
