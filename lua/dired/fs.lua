@@ -203,9 +203,9 @@ function FsEntry.New(id, filepath, parent_dir, filetype)
         mode = stat.mode,
         nlinks = stat.nlink,
         uid = stat.uid,
-        user = ut.getpwid(stat.uid).username,
+        user = ut.getpwid(stat.uid),
         gid = stat.gid,
-        group = ut.getgroupname(stat.gid).username,
+        group = ut.getgroupname(stat.gid),
         size = stat.size,
         stat = stat,
     }

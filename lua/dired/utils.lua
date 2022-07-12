@@ -12,56 +12,82 @@ function M.str_split(s, delimiter)
     return result
 end
 
+-- function M.getpwid(uid)
+--     -- return password database from /etc/passwd
+--     -- for a particular id
+--     local fd = uv.fs_open("/etc/passwd", "r", 0) -- open(file, O_RDONLY)
+--     local passwd = uv.fs_read(fd, 0xffff, 0)
+--     uv.fs_close(fd)
+--
+--     -- start parsing
+--     passwd = M.str_split(passwd, "\n")
+--     for i, passwd_entry in ipairs(passwd) do
+--         if #passwd_entry > 0 then
+--             passwd_entry = M.str_split(passwd_entry, ":")
+--             local pwstruct = {
+--                 idx = i,
+--                 username = passwd_entry[1],
+--                 uid = tonumber(passwd_entry[3], 10),
+--                 gid = tonumber(passwd_entry[4], 10),
+--                 homedir = passwd_entry[6],
+--                 shell = passwd_entry[7],
+--             }
+--
+--             if pwstruct.uid == uid then
+--                 return pwstruct
+--             end
+--         end
+--     end
+--     return nil
+-- end
+--
+-- function M.getgroupname(gid)
+--     local fd = uv.fs_open("/etc/group", "r", 0) -- open(file, O_RDONLY)
+--     local group = uv.fs_read(fd, 0xffff, 0)
+--     uv.fs_close(fd)
+--
+--     group = M.str_split(group, "\n")
+--     for i, group_entry in ipairs(group) do
+--         if #group_entry > 0 then
+--             group_entry = M.str_split(group_entry, ":")
+--             local gpstruct = {
+--                 idx = i,
+--                 username = group_entry[1],
+--                 gid = tonumber(group_entry[3], 10),
+--             }
+--
+--             if gpstruct.gid == gid then
+--                 return gpstruct
+--             end
+--         end
+--     end
+--     return nil
+-- end
+
+
 function M.getpwid(uid)
-    -- return password database from /etc/passwd
-    -- for a particular id
-    local fd = uv.fs_open("/etc/passwd", "r", 0) -- open(file, O_RDONLY)
-    local passwd = uv.fs_read(fd, 0xffff, 0)
-    uv.fs_close(fd)
+    -- using GNU id to get username because libuv
+    -- does not have a function to return password
+    -- database by user id. Only os_get_passwd() is
+    -- available.
 
-    -- start parsing
-    passwd = M.str_split(passwd, "\n")
-    for i, passwd_entry in ipairs(passwd) do
-        if #passwd_entry > 0 then
-            passwd_entry = M.str_split(passwd_entry, ":")
-            local pwstruct = {
-                idx = i,
-                username = passwd_entry[1],
-                uid = tonumber(passwd_entry[3], 10),
-                gid = tonumber(passwd_entry[4], 10),
-                homedir = passwd_entry[6],
-                shell = passwd_entry[7],
-            }
-
-            if pwstruct.uid == uid then
-                return pwstruct
-            end
-        end
+    local username = vim.fn.system(string.format("id -nu %d", uid))
+    if not username then
+        return nil
     end
-    return nil
+    username = username:gsub("[\n\r]", " ")
+    return username
 end
 
 function M.getgroupname(gid)
-    local fd = uv.fs_open("/etc/group", "r", 0) -- open(file, O_RDONLY)
-    local group = uv.fs_read(fd, 0xffff, 0)
-    uv.fs_close(fd)
+    -- using GNU id to get groupname.
 
-    group = M.str_split(group, "\n")
-    for i, group_entry in ipairs(group) do
-        if #group_entry > 0 then
-            group_entry = M.str_split(group_entry, ":")
-            local gpstruct = {
-                idx = i,
-                username = group_entry[1],
-                gid = tonumber(group_entry[3], 10),
-            }
-
-            if gpstruct.gid == gid then
-                return gpstruct
-            end
-        end
+    local groupname = vim.fn.system(string.format("id -ng %d", gid))
+    if not groupname then
+        return nil
     end
-    return nil
+    groupname = groupname:gsub("[\n\r]", " ")
+    return groupname
 end
 
 function M.get_short_size(size)
