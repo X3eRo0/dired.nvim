@@ -17,6 +17,24 @@ function M.setup(opts)
             vim.api.nvim_err_writeln("    " .. err)
         end
     end
+
+    -- global variable for show_hidden
+    if config.get("show_hidden") == nil then
+        -- default for show-hidden is true
+        vim.g.dired_show_hidden = true
+    else
+        vim.g.dired_show_hidden = config.get("show_hidden")
+    end
+
+    -- global variable for sort_order
+    if config.get("sort_order") == nil then
+        -- default for sort_order is sort_by_name
+        vim.g.dired_sort_order = true
+    else
+        vim.g.dired_sort_order = config.get("sort_order")
+    end
+
+
     -- setup keybinds
     local map = vim.api.nvim_set_keymap
 end
@@ -27,4 +45,6 @@ M.init = dired.init_dired
 M.rename = dired.rename_file
 M.create = dired.create_file
 M.delete = dired.delete_file
+M.toggle_hidden_files = dired.toggle_hidden_files
+M.toggle_sort_order = dired.toggle_sort_order
 return M

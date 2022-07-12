@@ -278,6 +278,7 @@ function FsEntry.Format(fs_t)
     local access_str = nui_text(string.format("%s", get_type_and_access_str(fs_t)), hl.NORMAL)
     local nlinks = nui_text(string.format("%5d", fs_t.nlinks), hl.DIM_TEXT)
     local username = nui_text(string.format("%10s", fs_t.user), hl.USERNAME)
+    local groupname = nui_text(string.format("%10s", fs_t.group), hl.USERNAME)
     local size_s, size_u = ut.get_colored_short_size(fs_t.size)
     local month, day, ftime = get_formatted_time(fs_t.stat)
     local file, sep, link = get_formatted_fileinfo(fs_t)
@@ -286,12 +287,13 @@ function FsEntry.Format(fs_t)
         + #access_str._content
         + #nlinks._content
         + #username._content
+        + #groupname._content
         + #size_s._content
         + #size_u._content
         + #month._content
         + #day._content
         + #ftime._content
-        + 9
+        + 10
     local sp = nui_text(" ")
     return {
         id,
@@ -301,6 +303,8 @@ function FsEntry.Format(fs_t)
         nlinks,
         sp,
         username,
+        sp,
+        groupname,
         sp,
         size_s,
         sp,
@@ -336,7 +340,7 @@ function FsEntry.CreateFile()
 
     if filename:sub(-1, -1) == M.path_separator then
         -- create a directory
-        local dir = vim.b.current_dired_path
+        local dir = vim.g.current_dired_path
         -- print(vim.inspect(M.join_paths(dir, filename)))
         local fd = vim.loop.fs_mkdir(M.join_paths(dir, filename), default_dir_mode)
 
@@ -345,7 +349,7 @@ function FsEntry.CreateFile()
             return
         end
     else
-        local dir = vim.b.current_dired_path
+        local dir = vim.g.current_dired_path
         local fd, err = vim.loop.fs_open(M.join_paths(dir, filename), "w+", default_file_mode)
 
         if not fd  or err ~= nil then

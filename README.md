@@ -47,3 +47,11 @@ Inside a directory buffer, there are the following keybindings:
 * `D`: Delete a directories or files.
 * `R`: Rename a directories or files.
 * `-`: Open parent directory.
+* `.`: Toggle show_hidden.
+* `,`: Change sort_order.
+
+## TODO
+
+1. Get directory listing from "ls" dired mode.
+2. Allow moving and copying of files.
+3. Allow changing file permissions.

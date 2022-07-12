@@ -1,13 +1,36 @@
 local M = {}
 
 -- TODO: Implement these
-local function sort_default(left, right)
-    return true
+local function sort_by_name(left, right)
+    if right.fs_entry == nil or left.fs_entry == nil then
+        return #left.line < #right.line
+    end
+    left = left.fs_entry
+    right = right.fs_entry
+    return left.filename:lower() < right.filename:lower()
+end
+
+local function sort_by_date(left, right)
+    if right.fs_entry == nil or left.fs_entry == nil then
+        return #left.line < #right.line
+    end
+    left = left.fs_entry
+    right = right.fs_entry
+    return left.stat.mtime.sec < right.stat.mtime.sec
 end
 
 -- TODO: Implement these
-local function sort_directories(left, right)
-    return true
+local function sort_by_dirs(left, right)
+    if right.fs_entry == nil or left.fs_entry == nil then
+        return #left.line < #right.line
+    end
+    left = left.fs_entry
+    right = right.fs_entry
+    if left.filetype ~= right.filetype then
+        return left.filetype < right.filetype
+    else
+        return left.filename:lower() < right.filename:lower()
+    end
 end
 
 local CONFIG_SPEC = {
@@ -21,12 +44,12 @@ local CONFIG_SPEC = {
     },
     path_separator = {
         default = "/",
-        check = function (val)
+        check = function(val)
             if type(val) ~= "string" then
                 return "Must be string of length 1, instead received " .. type(val)
             end
             if #val ~= 1 then
-                return "Must be string of length 1, instead received string of length ".. tostring(#val)
+                return "Must be string of length 1, instead received string of length " .. tostring(#val)
             end
         end,
     },
@@ -39,16 +62,18 @@ local CONFIG_SPEC = {
         end,
     },
     sort_order = {
-        default = sort_default,
+        default = "name",
         check = function(val)
-            if val == "default" then
-                return sort_default
-            elseif val == "directories" then
-                return sort_directories
+            if val == "name" then
+                return sort_by_name
+            elseif val == "dirs" then
+                return sort_by_dirs
+            elseif val == "date" then
+                return sort_by_date
             elseif type(val) == "function" then
                 return val
             else
-                return "Must be one of {\"default\", \"directories\", or function}"
+                return 'Must be one of {"name", "dirs", "date", or function}'
             end
         end,
     },
@@ -87,13 +112,43 @@ end
 
 function M.get(opt)
     if CONFIG_SPEC[opt] == nil then
-        error("Unrecognised Option: ".. opt)
+        error("Unrecognised Option: " .. opt)
     end
     if user_config[opt] == nil then
         return CONFIG_SPEC[opt].default
     else
         return user_config[opt]
     end
+end
+
+function M.get_sort_order(val)
+    if val == "name" then
+        return sort_by_name
+    elseif val == "dirs" then
+        return sort_by_dirs
+    elseif val == "date" then
+        return sort_by_date
+    elseif type(val) == "function" then
+        return val
+    else
+        return nil
+    end
+end
+
+function M.get_next_sort_order()
+    local current = vim.g.dired_sort_order
+    local sorting_functions = { "name", "date", "dirs" }
+    local idx = 0
+    for i, str in ipairs(sorting_functions) do
+        if str == current then
+            table.remove(sorting_functions, i)
+            idx = i
+        end
+    end
+    if idx > #sorting_functions then
+        idx = 1
+    end
+    return sorting_functions[idx]
 end
 
 return M

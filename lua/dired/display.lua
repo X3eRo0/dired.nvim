@@ -30,7 +30,7 @@ end
 
 function M.render(path)
     M.buffer = {}
-    -- vim.api.nvim_buf_set_lines(0, 0, -1, false, {})
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, {})
     if config.get("show_banner") then
         M.display_banner()
     end
@@ -53,7 +53,7 @@ end
 
 function M.get_dired_listing(directory)
     local buffer_listings = {}
-    local dir_files = dirs.get_dir_content(directory, config.get("show_hidden"))
+    local dir_files = dirs.get_dir_content(directory, vim.g.dired_show_hidden)
     local dir_size = dirs.get_dir_size_by_files(dir_files)
 
     local size = utils.get_short_size(dir_size)
@@ -63,20 +63,26 @@ function M.get_dired_listing(directory)
     local dis_info = nui_line()
     dis_path:append(string.format("%s:", fs.get_simplified_path(directory)), hl.NORMAL)
     dis_info:append(string.format("total used in directory %s", size), hl.NORMAL)
-    table.insert(buffer_listings, dis_path)
-    table.insert(buffer_listings, dis_info)
+    table.insert(buffer_listings, { line = dis_path, fs_entry = nil })
+    table.insert(buffer_listings, { line = dis_info, fs_entry = nil })
+    local temp = {}
     for i, fs_t in ipairs(dir_files) do
-        table.insert(buffer_listings, nui_line(fs.FsEntry.Format(fs_t)))
+        table.insert(temp, { line = nui_line(fs.FsEntry.Format(fs_t)), fs_entry = fs_t })
         if (#dir_files == 2 and i == 2) or (i == 3) then
-            M.cursor_pos = { #M.buffer + #buffer_listings, vim.b.cursor_column }
+            M.cursor_pos = { #M.buffer + #buffer_listings + #temp, vim.b.cursor_column }
         end
     end
-
+    table.sort(temp, config.get_sort_order(vim.g.dired_sort_order))
+    local buffer_listings = concatenate_tables(buffer_listings, temp)
     return buffer_listings
 end
 
 function M.display_dired_listing(directory)
-    local buffer_listings = M.get_dired_listing(directory)
+    local buffer_listings = {}
+    local temp = M.get_dired_listing(directory)
+    for _, tbl in ipairs(temp) do
+        table.insert(buffer_listings, tbl.line)
+    end
     -- vim.api.nvim_buf_set_lines(0, 0, -1, true, buffer_listings)
     M.buffer = concatenate_tables(M.buffer, buffer_listings)
 end
