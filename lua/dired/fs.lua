@@ -114,26 +114,25 @@ local function get_formatted_time(stat)
     local cdate = os.date("*t", stat.ctime.sec)
     local tdate = os.date("*t", os.time())
     local show_year = false
-    local sep = nui_text("", hl.NORMAL)
 
     if cdate.year < tdate.year then
         show_year = true
     end
 
     local ftime = nil
-    local month = nui_text(os.date("%6b", stat.ctime.sec), hl.MONTH)
-    local day = nui_text(os.date("%e", stat.ctime.sec), hl.DAY)
+    local month = nui_text(vim.fn.strftime("%5b", stat.ctime.sec), hl.MONTH)
+    local day = nui_text(vim.fn.strftime("%e", stat.ctime.sec), hl.DAY)
 
     if show_year then
-        ftime = nui_text(os.date("%Y  %H:%M", stat.ctime.sec))
+        ftime = nui_text(vim.fn.strftime("%Y  %H:%M", stat.ctime.sec))
     else
-        ftime = nui_text(os.date("%m-%y %H:%M", stat.ctime.sec))
+        ftime = nui_text(vim.fn.strftime("%m-%y %H:%M", stat.ctime.sec))
     end
 
     return month, day, ftime
 end
 
-function replace_char(pos, str, r)
+local function replace_char(pos, str, r)
     return str:sub(1, pos - 1) .. r .. str:sub(pos + 1)
 end
 
@@ -349,7 +348,7 @@ function FsEntry.CreateFile()
         local dir = vim.b.current_dired_path
         local fd, err = vim.loop.fs_open(M.join_paths(dir, filename), "w+", default_file_mode)
 
-        if not fd then
+        if not fd  or err ~= nil then
             vim.notify(string.format('DiredCreate: Could not create file "%s".', filename))
             return
         end
