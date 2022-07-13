@@ -73,6 +73,7 @@ function M.open_dir(path)
 end
 
 function M.enter_dir(cmd)
+    vim.notify("Entering a directory")
     if vim.bo.filetype ~= "dired" then
         return
     end
