@@ -97,13 +97,18 @@ function M.setup(opts)
     -- open dired when opening a directory
     vim.api.nvim_create_autocmd("BufEnter", {
         pattern = "*",
-	command = "if isdirectory(expand('%')) && !&modified | execute 'lua require(\"dired\").init(vim.b.dired_history, vim.b.dired_history_sp, true)' | endif",
+        command = "if isdirectory(expand('%')) && !&modified | execute 'lua require(\"dired\").init(vim.b.dired_history, vim.b.dired_history_sp, true)' | endif",
+        group = dired_group
+    })
+
+    vim.api.nvim_create_autocmd("VimEnter", {
+        pattern = "*",
+        command = "if exists('#FileExplorer') | execute 'autocmd! FileExplorer *' | endif",
         group = dired_group
     })
 
     if vim.fn.exists("#FileExplorer") then
         vim.cmd([[silent autocmd! FileExplorer *]])
-        vim.cmd([[autocmd VimEnter * silent! autocmd! FileExplorer *]])
     end
     vim.g.dired_loaded = true
 end
