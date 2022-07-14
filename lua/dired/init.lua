@@ -107,9 +107,13 @@ function M.setup(opts)
         group = dired_group
     })
 
-    if vim.fn.exists("#FileExplorer") then
-        vim.cmd([[silent autocmd! FileExplorer *]])
-    end
+    vim.api.nvim_create_autocmd("VimEnter", {
+        pattern = "*",
+        command = "if exists('#NERDTreeHijackNetrw') | exe 'au! NERDTreeHijackNetrw *' | endif",
+        group = dired_group
+    })
+
+    vim.cmd([[if exists('#FileExplorer') | execute 'autocmd! FileExplorer *' | endif]])
     vim.g.dired_loaded = true
 end
 
