@@ -101,9 +101,10 @@ function M.setup(opts)
         group = dired_group
     })
 
-    vim.cmd([[silent autocmd! FileExplorer *]])
-    vim.cmd([[autocmd VimEnter * silent! autocmd! FileExplorer *]])
-    
+    if vim.fn.exists("#FileExplorer") then
+        vim.cmd([[silent autocmd! FileExplorer *]])
+        vim.cmd([[autocmd VimEnter * silent! autocmd! FileExplorer *]])
+    end
     vim.g.dired_loaded = true
 end
 
