@@ -1,9 +1,9 @@
 -- display the directory and its contents
-local dirs = require("dired.dirs")
 local fs = require("dired.fs")
-local hl = require("dired.highlight")
+local ls = require("dired.ls")
 local config = require("dired.config")
 local nui_line = require("nui.line")
+local nui_text = require("nui.text")
 local utils = require("dired.utils")
 local M = {}
 
@@ -12,28 +12,13 @@ local M = {}
 M.buffer = {}
 M.cursor_pos = {}
 
-local function concatenate_tables(table1, table2)
-    for _, v in ipairs(table2) do
-        table.insert(table1, v)
-    end
-    return table1
-end
-
-function M.display_banner()
-    local banner = {
-        nui_line("NVIM-Dired by X3eRo0", "Normal"),
-        nui_line("Version 1.0", "Normal"),
-    }
-
-    M.buffer = concatenate_tables(M.buffer, banner)
+function M.clear()
+    M.buffer = {}
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, {})
 end
 
 function M.render(path)
-    M.buffer = {}
-    vim.api.nvim_buf_set_lines(0, 0, -1, false, {})
-    if config.get("show_banner") then
-        M.display_banner()
-    end
+    M.clear()
     M.display_dired_listing(path)
     M.flush_buffer()
 end
@@ -41,7 +26,6 @@ end
 function M.flush_buffer()
     local undolevels = vim.bo.undolevels
     vim.bo.undolevels = -1
-    -- vim.api.nvim_buf_set_lines(0, 0, -1, true, M.buffer)
     for i, line in ipairs(M.buffer) do
         line:render(0, -1, i)
     end
@@ -51,44 +35,45 @@ function M.flush_buffer()
     M.buffer = {}
 end
 
-function M.get_dired_listing(directory)
-    local buffer_listings = {}
-    local dir_files = dirs.get_dir_content(directory, vim.g.dired_show_hidden)
-    local dir_size = dirs.get_dir_size_by_files(dir_files)
+function M.get_directory_listing(directory)
+    local buffer_listing = {}
+    local dir_files, error = ls.fs_entry.get_directory(directory, vim.g.dired_show_dot_dirs, vim.g.dired_show_hidden)
+    local dir_size = dir_files.size
+    local dir_size_str = utils.get_short_size(dir_size)
+    local info1 = { nui_text(string.format("%s:", fs.get_simplified_path(directory))) }
+    local info2 = { nui_text(string.format("total used in directory %s:", dir_size_str)) }
+    local formatted_components, cursor_x = ls.fs_entry.format(dir_files)
+    table.insert(buffer_listing, { component = nil, line = info1 })
+    table.insert(buffer_listing, { component = nil, line = info2 })
 
-    local size = utils.get_short_size(dir_size)
-
-    -- printing the current directory (ex. "/home/x3ero0:")
-    local dis_path = nui_line()
-    local dis_info = nui_line()
-    dis_path:append(string.format("%s:", fs.get_simplified_path(directory)), hl.NORMAL)
-    dis_info:append(string.format("total used in directory %s", size), hl.NORMAL)
-    table.insert(buffer_listings, { line = dis_path, fs_entry = nil })
-    table.insert(buffer_listings, { line = dis_info, fs_entry = nil })
-    local temp = {}
-    for i, fs_t in ipairs(dir_files) do
-        table.insert(temp, { line = nui_line(fs.FsEntry.Format(fs_t)), fs_entry = fs_t })
-        if (#dir_files == 2 and i == 2) or (i == 3) then
-            M.cursor_pos = { #M.buffer + #buffer_listings + #temp, vim.b.cursor_column }
-        end
+    if #formatted_components > #buffer_listing then
+        M.cursor_pos = { 5, cursor_x } -- first file after the dot dirs
+    else
+        M.cursor_pos = { 4, cursor_x } -- on the ".." directory
     end
-    table.sort(temp, config.get_sort_order(vim.g.dired_sort_order))
-    local buffer_listings = concatenate_tables(buffer_listings, temp)
-    return buffer_listings
+
+    local listing = {}
+    for _, comp in ipairs(formatted_components) do
+        table.insert(listing, ls.get_colored_component_str(comp))
+    end
+
+    table.sort(listing, config.get_sort_order(vim.g.dired_sort_order))
+    local buffer_listing = utils.concatenate_tables(buffer_listing, listing)
+    return buffer_listing
 end
 
 function M.display_dired_listing(directory)
     local buffer_listings = {}
-    local temp = M.get_dired_listing(directory)
-    for _, tbl in ipairs(temp) do
-        table.insert(buffer_listings, tbl.line)
+    local listing = M.get_directory_listing(directory)
+    for _, tbl in ipairs(listing) do
+        table.insert(buffer_listings, nui_line(tbl.line))
     end
-    -- vim.api.nvim_buf_set_lines(0, 0, -1, true, buffer_listings)
-    M.buffer = concatenate_tables(M.buffer, buffer_listings)
+    M.buffer = utils.concatenate_tables(M.buffer, buffer_listings)
 end
 
-function M.get_id_from_listing(line)
-    return tonumber(utils.str_split(line, " ")[1], 10)
+function M.get_filename_from_listing(line)
+    local splitted = utils.str_split(line, " ")
+    return splitted[#splitted - 1]
 end
 
 return M

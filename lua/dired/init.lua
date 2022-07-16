@@ -18,7 +18,6 @@ M.toggle_hidden_files = dired.toggle_hidden_files
 M.toggle_sort_order = dired.toggle_sort_order
 
 function M.setup(opts)
-
     -- apply user config
     local errs = config.update(opts)
     if #errs == 1 then
@@ -42,6 +41,13 @@ function M.setup(opts)
         vim.g.dired_show_hidden = config.get("show_hidden")
     end
 
+    if config.get("show_dot_dirs") == nil then
+        -- default for show-hidden is true
+        vim.g.dired_show_dot_dirs = true
+    else
+        vim.g.dired_show_dot_dirs = config.get("show_dot_dirs")
+    end
+
     -- global variable for sort_order
     if config.get("sort_order") == nil then
         -- default for sort_order is sort_by_name
@@ -53,7 +59,7 @@ function M.setup(opts)
     vim.cmd([[command! -nargs=? -complete=dir Dired lua require'dired'.open(<q-args>)]])
     vim.cmd([[command! -nargs=? -complete=file DiredRename lua require'dired'.rename(<q-args>)]])
     vim.cmd([[command! -nargs=? -complete=file DiredDelete lua require'dired'.delete(<q-args>)]])
-    vim.cmd([[command! DiredEnter e <cfile>]])
+    vim.cmd([[command! DiredEnter lua require'dired'.enter(<q-args>)]])
     vim.cmd([[command! DiredCreate lua require'dired'.create()]])
     vim.cmd([[command! DiredToggleHidden lua require'dired'.toggle_hidden_files()]])
     vim.cmd([[command! DiredToggleSortOrder lua require'dired'.toggle_sort_order()]])
@@ -61,7 +67,7 @@ function M.setup(opts)
 
     -- setup keybinds
     local map = vim.api.nvim_set_keymap
-    local opt = {unique = true, silent = true, noremap = true}
+    local opt = { unique = true, silent = true, noremap = true }
     map("", "<Plug>(dired_up)", "<cmd>execute 'Dired ..'<cr>", opt)
     map("", "<Plug>(dired_enter)", "<cmd>execute 'DiredEnter'<cr>", opt)
     map("", "<Plug>(dired_rename)", "<cmd>execute 'DiredRename'<cr>", opt)
@@ -71,13 +77,13 @@ function M.setup(opts)
     map("", "<Plug>(dired_toggle_sort_order)", "<cmd>execute 'DiredToggleSortOrder'<cr>", opt)
 
     if vim.fn.mapcheck("-", "n") == "" and not vim.fn.hasmapto("<Plug>(dired_up)", "n") then
-        map("n", "-", "<Plug>(dired_up)", {silent = true})
+        map("n", "-", "<Plug>(dired_up)", { silent = true })
     end
 
     -- set dired keybinds
     -- from https://www.youtube.com/watch?v=ekMIIAqTZ34
     map = vim.api.nvim_buf_set_keymap
-    opt = {silent = true, noremap = true}
+    opt = { silent = true, noremap = true }
 
     vim.api.nvim_create_autocmd("FileType", {
         pattern = "dired",
@@ -92,25 +98,25 @@ function M.setup(opts)
         end,
     })
 
-    local dired_group = vim.api.nvim_create_augroup("dired", {clear = true})
+    local dired_group = vim.api.nvim_create_augroup("dired", { clear = true })
 
     -- open dired when opening a directory
     vim.api.nvim_create_autocmd("BufEnter", {
         pattern = "*",
         command = "if isdirectory(expand('%')) && !&modified | execute 'lua require(\"dired\").init(vim.b.dired_history, vim.b.dired_history_sp, true)' | endif",
-        group = dired_group
+        group = dired_group,
     })
 
     vim.api.nvim_create_autocmd("VimEnter", {
         pattern = "*",
         command = "if exists('#FileExplorer') | execute 'autocmd! FileExplorer *' | endif",
-        group = dired_group
+        group = dired_group,
     })
 
     vim.api.nvim_create_autocmd("VimEnter", {
         pattern = "*",
         command = "if exists('#NERDTreeHijackNetrw') | exe 'au! NERDTreeHijackNetrw *' | endif",
-        group = dired_group
+        group = dired_group,
     })
 
     vim.cmd([[if exists('#FileExplorer') | execute 'autocmd! FileExplorer *' | endif]])

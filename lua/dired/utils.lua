@@ -12,58 +12,16 @@ function M.str_split(s, delimiter)
     return result
 end
 
--- function M.getpwid(uid)
---     -- return password database from /etc/passwd
---     -- for a particular id
---     local fd = uv.fs_open("/etc/passwd", "r", 0) -- open(file, O_RDONLY)
---     local passwd = uv.fs_read(fd, 0xffff, 0)
---     uv.fs_close(fd)
---
---     -- start parsing
---     passwd = M.str_split(passwd, "\n")
---     for i, passwd_entry in ipairs(passwd) do
---         if #passwd_entry > 0 then
---             passwd_entry = M.str_split(passwd_entry, ":")
---             local pwstruct = {
---                 idx = i,
---                 username = passwd_entry[1],
---                 uid = tonumber(passwd_entry[3], 10),
---                 gid = tonumber(passwd_entry[4], 10),
---                 homedir = passwd_entry[6],
---                 shell = passwd_entry[7],
---             }
---
---             if pwstruct.uid == uid then
---                 return pwstruct
---             end
---         end
---     end
---     return nil
--- end
---
--- function M.getgroupname(gid)
---     local fd = uv.fs_open("/etc/group", "r", 0) -- open(file, O_RDONLY)
---     local group = uv.fs_read(fd, 0xffff, 0)
---     uv.fs_close(fd)
---
---     group = M.str_split(group, "\n")
---     for i, group_entry in ipairs(group) do
---         if #group_entry > 0 then
---             group_entry = M.str_split(group_entry, ":")
---             local gpstruct = {
---                 idx = i,
---                 username = group_entry[1],
---                 gid = tonumber(group_entry[3], 10),
---             }
---
---             if gpstruct.gid == gid then
---                 return gpstruct
---             end
---         end
---     end
---     return nil
--- end
+function M.replace_char(pos, str, r)
+    return str:sub(1, pos - 1) .. r .. str:sub(pos + 1)
+end
 
+function M.concatenate_tables(table1, table2)
+    for _, v in ipairs(table2) do
+        table.insert(table1, v)
+    end
+    return table1
+end
 
 function M.getpwid(uid)
     -- using GNU id to get username because libuv
@@ -75,7 +33,7 @@ function M.getpwid(uid)
     if not username then
         return nil
     end
-    username = username:gsub("[\n\r]", " ")
+    username = username:gsub("[\n\r]", "")
     return username
 end
 
@@ -86,17 +44,17 @@ function M.getgroupname(gid)
     if not groupname then
         return nil
     end
-    groupname = groupname:gsub("[\n\r]", " ")
+    groupname = groupname:gsub("[\n\r]", "")
     return groupname
 end
 
 function M.get_short_size(size)
     local size_units = {
-        "B ",
-        "KB",
-        "MB",
-        "GB",
-        "TB",
+        "",
+        "K",
+        "M",
+        "G",
+        "T",
     }
     local idx = 1
     while size > 1024 and idx < 5 do
@@ -105,33 +63,64 @@ function M.get_short_size(size)
     end
 
     if idx == 1 then
-        return string.format("%7d %s", size, size_units[idx])
+        return string.format("%d%s", size, size_units[idx])
     else
-        return string.format("%7.1f %s", size, size_units[idx])
+        return string.format("%.1f%s", size, size_units[idx])
     end
 end
 
-function M.get_colored_short_size(size)
-    local size_units = {
-        "B ",
-        "KB",
-        "MB",
-        "GB",
-        "TB",
-    }
-    local idx = 1
-    while size > 1024 and idx < 5 do
-        size = size / 1024
-        idx = idx + 1
-    end
-    local s_str = nil
-    if idx == 1 then
-        s_str = nui_text(string.format("%7d", size), hl.SIZE)
+function M.get_ftime(stat)
+    local os = require("os")
+
+    -- decide which time to show mtime or ctime?
+    local time = nil
+    if stat.ctime.sec > stat.mtime.sec then
+        time = stat.ctime.sec
     else
-        s_str = nui_text(string.format("%7.1f", size), hl.SIZE)
+        time = stat.mtime.sec
     end
-    local u_str = nui_text(string.format("%s", size_units[idx]), hl.BOLD)
-    return s_str, u_str
+    local cdate = os.date("*t", time)
+    local tdate = os.date("*t", os.time())
+    local show_year = false
+
+    if cdate.year < tdate.year then
+        show_year = true
+    end
+
+    local ftime = nil
+    if show_year then
+        ftime = vim.fn.strftime("%Y  %H:%M", time)
+    else
+        ftime = vim.fn.strftime("%m-%y %H:%M", time)
+    end
+
+    return ftime
+end
+
+function M.get_month(stat)
+    local os = require("os")
+
+    -- decide which time to show mtime or ctime?
+    local time = nil
+    if stat.ctime.sec > stat.mtime.sec then
+        time = stat.ctime.sec
+    else
+        time = stat.mtime.sec
+    end
+    return vim.fn.strftime("%b", time)
+end
+
+function M.get_day(stat)
+    local os = require("os")
+
+    -- decide which time to show mtime or ctime?
+    local time = nil
+    if stat.ctime.sec > stat.mtime.sec then
+        time = stat.ctime.sec
+    else
+        time = stat.mtime.sec
+    end
+    return vim.fn.strftime("%e", time)
 end
 
 function M.bitand(a, b)

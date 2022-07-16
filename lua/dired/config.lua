@@ -1,39 +1,16 @@
 local M = {}
 
--- TODO: Implement these
-local function sort_by_name(left, right)
-    if right.fs_entry == nil or left.fs_entry == nil then
-        return #left.line < #right.line
-    end
-    left = left.fs_entry
-    right = right.fs_entry
-    return left.filename:lower() < right.filename:lower()
-end
-
-local function sort_by_date(left, right)
-    if right.fs_entry == nil or left.fs_entry == nil then
-        return #left.line < #right.line
-    end
-    left = left.fs_entry
-    right = right.fs_entry
-    return left.stat.mtime.sec < right.stat.mtime.sec
-end
-
--- TODO: Implement these
-local function sort_by_dirs(left, right)
-    if right.fs_entry == nil or left.fs_entry == nil then
-        return #left.line < #right.line
-    end
-    left = left.fs_entry
-    right = right.fs_entry
-    if left.filetype ~= right.filetype then
-        return left.filetype < right.filetype
-    else
-        return left.filename:lower() < right.filename:lower()
-    end
-end
+local sort = require("dired.sort")
 
 local CONFIG_SPEC = {
+    show_dot_dirs = {
+        default = true,
+        check = function(val)
+            if type(val) ~= "boolean" then
+                return "Must be boolean, instead received " .. type(val)
+            end
+        end,
+    },
     show_hidden = {
         default = true,
         check = function(val)
@@ -65,11 +42,11 @@ local CONFIG_SPEC = {
         default = "name",
         check = function(val)
             if val == "name" then
-                return sort_by_name
+                return sort.sort_by_name
             elseif val == "dirs" then
-                return sort_by_dirs
+                return sort.sort_by_dirs
             elseif val == "date" then
-                return sort_by_date
+                return sort.sort_by_date
             elseif type(val) == "function" then
                 return val
             else
@@ -123,11 +100,11 @@ end
 
 function M.get_sort_order(val)
     if val == "name" then
-        return sort_by_name
+        return sort.sort_by_name
     elseif val == "dirs" then
-        return sort_by_dirs
+        return sort.sort_by_dirs
     elseif val == "date" then
-        return sort_by_date
+        return sort.sort_by_date
     elseif type(val) == "function" then
         return val
     else
