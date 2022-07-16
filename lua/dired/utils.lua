@@ -26,22 +26,36 @@ function M.getpwid(uid)
     -- database by user id. Only os_get_passwd() is
     -- available.
 
+    if vim.loop.os_uname().sysname == "Windows_NT" then
+        return vim.loop.os_getenv("USERNAME")
+    end
+
     local username = vim.fn.system(string.format("id -nu %d", uid))
     if not username then
         return nil
     end
     username = username:gsub("[\n\r]", "")
+    if string.find(username, "no such user") then
+        username = "<NULL>"
+    end
     return username
 end
 
 function M.getgroupname(gid)
     -- using GNU id to get groupname.
 
+    if vim.loop.os_uname().sysname == "Windows_NT" then
+        return vim.loop.os_gethostname()
+    end
+
     local groupname = vim.fn.system(string.format("id -ng %d", gid))
     if not groupname then
         return nil
     end
     groupname = groupname:gsub("[\n\r]", "")
+    if string.find(groupname, "no such user") then
+        groupname = "<NULL>"
+    end
     return groupname
 end
 
