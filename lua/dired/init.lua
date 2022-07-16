@@ -15,6 +15,7 @@ M.create = dired.create_file
 M.delete = dired.delete_file
 M.toggle_hidden_files = dired.toggle_hidden_files
 M.toggle_sort_order = dired.toggle_sort_order
+M.toggle_colors = dired.toggle_colors
 
 function M.setup(opts)
     -- apply user config
@@ -30,6 +31,13 @@ function M.setup(opts)
 
     if vim.g.dired_loaded then
         return
+    end
+
+    if config.get("show_colors") == nil then
+        -- default for show-hidden is true
+        vim.g.dired_show_colors = true
+    else
+        vim.g.dired_show_colors = config.get("show_colors")
     end
 
     -- global variable for show_hidden
@@ -62,6 +70,7 @@ function M.setup(opts)
     vim.cmd([[command! DiredCreate lua require'dired'.create()]])
     vim.cmd([[command! DiredToggleHidden lua require'dired'.toggle_hidden_files()]])
     vim.cmd([[command! DiredToggleSortOrder lua require'dired'.toggle_sort_order()]])
+    vim.cmd([[command! DiredToggleColors lua require'dired'.toggle_colors()]])
     vim.cmd([[command! DiredQuit lua require'dired'.quit()]])
 
     -- setup keybinds
@@ -74,6 +83,7 @@ function M.setup(opts)
     map("", "<Plug>(dired_create)", "<cmd>execute 'DiredCreate'<cr>", opt)
     map("", "<Plug>(dired_toggle_hidden)", "<cmd>execute 'DiredToggleHidden'<cr>", opt)
     map("", "<Plug>(dired_toggle_sort_order)", "<cmd>execute 'DiredToggleSortOrder'<cr>", opt)
+    map("", "<Plug>(dired_toggle_colors)", "<cmd>execute 'DiredToggleColors'<cr>", opt)
 
     if vim.fn.mapcheck("-", "n") == "" and not vim.fn.hasmapto("<Plug>(dired_up)", "n") then
         map("n", "-", "<Plug>(dired_up)", { silent = true })
@@ -94,6 +104,7 @@ function M.setup(opts)
             map(0, "n", "D", "<Plug>(dired_delete)", opt)
             map(0, "n", ".", "<Plug>(dired_toggle_hidden)", opt)
             map(0, "n", ",", "<Plug>(dired_toggle_sort_order)", opt)
+            map(0, "n", "c", "<Plug>(dired_toggle_colors)", opt)
         end,
     })
 

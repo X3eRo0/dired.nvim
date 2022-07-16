@@ -3,6 +3,14 @@ local M = {}
 local sort = require("dired.sort")
 
 local CONFIG_SPEC = {
+    show_colors = {
+        default = true,
+        check = function(val)
+            if type(val) ~= "boolean" then
+                return "Must be boolean, instead received " .. type(val)
+            end
+        end,
+    },
     show_dot_dirs = {
         default = true,
         check = function(val)

@@ -11,7 +11,7 @@ A file browser inspired from Emacs Dired for neovim.
 Requires [Neovim 0.6](https://github.com/neovim/neovim/releases/tag/v0.6.0) or
 higher.
 
-```
+```lua
 use {
     "X3eRo0/dired.nvim",
     requires = "MunifTanjim/nui.nvim",
@@ -20,6 +20,8 @@ use {
             path_separator = "/",
             show_banner = false,
             show_hidden = true
+            show_dot_dirs = true,
+            show_colors = true,
         }
     end
 }
@@ -49,6 +51,7 @@ Inside a directory buffer, there are the following keybindings:
 * `-`: Open parent directory.
 * `.`: Toggle show_hidden.
 * `,`: Change sort_order.
+* `c`: Toggle colors
 
 ## TODO
 

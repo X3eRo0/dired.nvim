@@ -74,7 +74,6 @@ end
 
 -- open a file or traverse inside a directory
 function M.enter_dir()
-    vim.notify("Entering a directory")
     if vim.bo.filetype ~= "dired" then
         return
     end
@@ -121,6 +120,13 @@ end
 -- change the sort order
 function M.toggle_sort_order()
     vim.g.dired_sort_order = config.get_next_sort_order()
+    local history, sp = vim.b.dired_history, vim.b.dired_history_sp
+    M.init_dired(history, sp, true)
+end
+
+-- change colors
+function M.toggle_colors()
+    vim.g.dired_show_colors = not vim.g.dired_show_colors
     local history, sp = vim.b.dired_history, vim.b.dired_history_sp
     M.init_dired(history, sp, true)
 end

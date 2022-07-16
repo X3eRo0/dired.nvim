@@ -279,18 +279,21 @@ function fs_entry.format(dir_files)
 end
 
 function M.get_component_str(component)
-    return string.format(
-        "%s %s %s %s %s %s %s %s %s",
-        component.permissions,
-        component.nlinks,
-        component.owner,
-        component.group,
-        component.size,
-        component.month,
-        component.day,
-        component.ftime,
-        component.filename
-    )
+    return {
+        component = component,
+        line = string.format(
+            "%s %s %s %s %s %s %s %s %s",
+            component.permissions,
+            component.nlinks,
+            component.owner,
+            component.group,
+            component.size,
+            component.month,
+            component.day,
+            component.ftime,
+            component.filename
+        ),
+    }
 end
 
 function M.get_colored_component_str(component)
@@ -325,9 +328,11 @@ function M.get_colored_component_str(component)
 
     local line = {}
     local seperator = nui_text(" ")
-    for _, text in ipairs(text_group) do
-        table.insert(line, text)
-        table.insert(line, seperator)
+    for i = 1, #text_group do
+        table.insert(line, text_group[i])
+        if i ~= #text_group then
+            table.insert(line, seperator)
+        end
     end
 
     -- returns component and formatted line

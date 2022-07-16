@@ -26,8 +26,12 @@ end
 function M.flush_buffer()
     local undolevels = vim.bo.undolevels
     vim.bo.undolevels = -1
-    for i, line in ipairs(M.buffer) do
-        line:render(0, -1, i)
+    if vim.g.dired_show_colors then
+        for i, line in ipairs(M.buffer) do
+            line:render(0, -1, i)
+        end
+    else
+        vim.api.nvim_buf_set_lines(0, 0, -1, true, M.buffer)
     end
     vim.bo.undolevels = undolevels
     vim.bo.modified = false
@@ -40,8 +44,14 @@ function M.get_directory_listing(directory)
     local dir_files, error = ls.fs_entry.get_directory(directory, vim.g.dired_show_dot_dirs, vim.g.dired_show_hidden)
     local dir_size = dir_files.size
     local dir_size_str = utils.get_short_size(dir_size)
-    local info1 = { nui_text(string.format("%s:", fs.get_simplified_path(directory))) }
-    local info2 = { nui_text(string.format("total used in directory %s:", dir_size_str)) }
+    local info1, info2 = nil, nil
+    if vim.g.dired_show_colors then
+        info1 = { nui_text(string.format("%s:", fs.get_simplified_path(directory))) }
+        info2 = { nui_text(string.format("total used in directory %s:", dir_size_str)) }
+    else
+        info1 = string.format("%s:", fs.get_simplified_path(directory))
+        info2 = string.format("total used in directory %s:", dir_size_str)
+    end
     local formatted_components, cursor_x = ls.fs_entry.format(dir_files)
     table.insert(buffer_listing, { component = nil, line = info1 })
     table.insert(buffer_listing, { component = nil, line = info2 })
@@ -54,11 +64,15 @@ function M.get_directory_listing(directory)
 
     local listing = {}
     for _, comp in ipairs(formatted_components) do
-        table.insert(listing, ls.get_colored_component_str(comp))
+        if vim.g.dired_show_colors then
+            table.insert(listing, ls.get_colored_component_str(comp))
+        else
+            table.insert(listing, ls.get_component_str(comp))
+        end
     end
 
     table.sort(listing, config.get_sort_order(vim.g.dired_sort_order))
-    local buffer_listing = utils.concatenate_tables(buffer_listing, listing)
+    buffer_listing = utils.concatenate_tables(buffer_listing, listing)
     return buffer_listing
 end
 
@@ -66,14 +80,18 @@ function M.display_dired_listing(directory)
     local buffer_listings = {}
     local listing = M.get_directory_listing(directory)
     for _, tbl in ipairs(listing) do
-        table.insert(buffer_listings, nui_line(tbl.line))
+        if vim.g.dired_show_colors then
+            table.insert(buffer_listings, nui_line(tbl.line))
+        else
+            table.insert(buffer_listings, tbl.line)
+        end
     end
     M.buffer = utils.concatenate_tables(M.buffer, buffer_listings)
 end
 
 function M.get_filename_from_listing(line)
     local splitted = utils.str_split(line, " ")
-    return splitted[#splitted - 1]
+    return splitted[#splitted]
 end
 
 return M
