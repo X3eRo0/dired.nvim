@@ -2,7 +2,6 @@ local fs = require("dired.fs")
 local ls = require("dired.ls")
 local display = require("dired.display")
 local config = require("dired.config")
-local dirs = require("dired.dirs")
 local funcs = require("dired.functions")
 
 local M = {}
@@ -55,6 +54,7 @@ function M.init_dired(history, sp, update_history)
     display.render(path)
 end
 
+-- open a new directory
 function M.open_dir(path)
     if path == "" then
         path = "."
@@ -72,6 +72,7 @@ function M.open_dir(path)
     M.init_dired(history, sp, true)
 end
 
+-- open a file or traverse inside a directory
 function M.enter_dir()
     vim.notify("Entering a directory")
     if vim.bo.filetype ~= "dired" then
@@ -110,18 +111,21 @@ function M.enter_dir()
     -- with that file
 end
 
+-- toggle between showing hidden files
 function M.toggle_hidden_files()
     vim.g.dired_show_hidden = not vim.g.dired_show_hidden
     local history, sp = vim.b.dired_history, vim.b.dired_history_sp
     M.init_dired(history, sp, true)
 end
 
+-- change the sort order
 function M.toggle_sort_order()
     vim.g.dired_sort_order = config.get_next_sort_order()
     local history, sp = vim.b.dired_history, vim.b.dired_history_sp
     M.init_dired(history, sp, true)
 end
 
+-- rename a file
 function M.rename_file()
     local dir = nil
     dir = vim.g.current_dired_path
@@ -136,11 +140,13 @@ function M.rename_file()
     M.init_dired(vim.b.dired_history, vim.b.dired_history_sp, true)
 end
 
+-- create a file
 function M.create_file()
     funcs.create_file()
     M.init_dired(vim.b.dired_history, vim.b.dired_history_sp, true)
 end
 
+-- delete a file
 function M.delete_file()
     local dir = nil
     dir = vim.g.current_dired_path

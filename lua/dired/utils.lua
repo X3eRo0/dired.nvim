@@ -1,7 +1,4 @@
 -- util functions
-local uv = vim.loop
-local hl = require("dired.highlight")
-local nui_text = require("nui.text")
 local M = {}
 
 function M.str_split(s, delimiter)

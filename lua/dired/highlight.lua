@@ -10,9 +10,7 @@ M.FADE_TEXT_2 = "DiredFadeText2"
 M.FILE_NAME = "DiredFileName"
 M.FILE_SUID = "DiredFileSuid"
 M.FILE_EXECUTABLE = "DiredFileExecutable"
-M.HIDDEN_BY_NAME = "DiredHiddenByName"
 M.NORMAL = "DiredNormal"
-M.NORMALNC = "DiredNormalNC"
 M.SIZE = "DiredSize"
 M.NORMALBOLD = "DiredNormalBold"
 M.USERNAME = "DiredUsername"
@@ -181,9 +179,7 @@ M.setup = function()
     create_highlight_group(M.DAY, {}, nil, "778899", "bold")
     create_highlight_group(M.FILE_NAME, {}, "NONE", "NONE")
     create_highlight_group(M.FILE_SUID, {}, "ff6666", "000000", "bold")
-    create_highlight_group(M.HIDDEN_BY_NAME, { M.DOTFILE }, nil, nil)
     create_highlight_group(M.NORMAL, { "Normal" })
-    create_highlight_group(M.NORMALNC, { "NormalNC", M.NORMAL })
     create_highlight_group(M.NORMALBOLD, {}, nil, "ffffff", "bold")
     create_highlight_group(M.SYMBOLIC_LINK, {}, nil, "33ccff", "bold")
     create_highlight_group(M.SYMBOLIC_LINK_TARGET, {}, "5bd75b", "000000", "bold")

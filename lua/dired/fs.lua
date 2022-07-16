@@ -1,9 +1,5 @@
 -- functions for fetching files and directories information
-local ut = require("dired.utils")
 local config = require("dired.config")
-local nui_text = require("nui.text")
-local hl = require("dired.highlight")
-local uv = vim.loop
 
 local M = {}
 

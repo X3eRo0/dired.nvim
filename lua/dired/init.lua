@@ -2,7 +2,6 @@
 -- Author: X3eRo0
 local config = require("dired.config")
 local dired = require("dired.dired")
-local fs = require("dired.fs")
 
 require("dired.highlight").setup()
 
