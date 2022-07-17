@@ -92,7 +92,18 @@ end
 
 function M.get_filename_from_listing(line)
     local splitted = utils.str_split(line, " ")
-    return splitted[#splitted]
+    local filename = {}
+    local idx = 0
+    for i, word in ipairs(splitted) do
+        if string.find(word, ":") then
+            idx = i+1
+            break
+        end
+    end
+    for i=idx, #splitted do
+        table.insert(filename, splitted[i])
+    end
+    return table.concat(filename, " ")
 end
 
 return M
