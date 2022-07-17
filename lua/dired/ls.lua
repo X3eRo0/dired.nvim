@@ -74,16 +74,17 @@ end
 
 -- fs_entry functions
 
-function fs_entry.new(filepath, parent_dir, filetype)
+function fs_entry.new(filename, parent_dir, filetype)
     -- create a file entry
 
+    local filepath = fs.join_paths(parent_dir, filename)
     local stat, err = vim.loop.fs_lstat(filepath)
     if stat == nil then
         return nil, err
     end
 
     local fs_t = {
-        filename = fs.get_filename(filepath),
+        filename = filename,
         filepath = filepath,
         parent_dir = parent_dir,
         filetype = filetype,
@@ -100,42 +101,27 @@ function fs_entry.new(filepath, parent_dir, filetype)
     return fs_t, err
 end
 
-fs_entry.cache = {}
+-- fs_entry.cache = {}
 
 function fs_entry.get_directory(directory)
-    if fs_entry.cache[directory] ~= nil then
-        return fs_entry.cache[directory]
-    end
+    -- if fs_entry.cache[directory] ~= nil then
+    --     return fs_entry.cache[directory]
+    -- end
     -- array of fs_entries of all files in the directory
     local dir_fs = {}
     local fs_t = nil
     -- get fd for directory and start scanning.
     local dirfd, error = vim.loop.fs_scandir(directory)
-    -- return error
-    if dirfd == nil then
-        vim.notify(string.format("Dired: %s", error))
-        return nil, error
-    end
-
     local dir_size = 0
 
     -- append the "." directory
-    fs_t, error = fs_entry.new(fs.join_paths(directory, "."), directory, "directory")
-    if fs_t == nil then
-        vim.notify(string.format("Dired: could not populate fs_entry for dot directories. (%s)", error, "error"))
-        return nil, error
-    end
+    fs_t, error = fs_entry.new(".", directory, "directory")
     table.insert(dir_fs, fs_t)
 
     -- append the ".." directory
-    fs_t, error = fs_entry.new(fs.join_paths(directory, ".."), directory, "directory")
-    if fs_t == nil then
-        vim.notify(string.format("Dired: could not populate fs_entry for dot directories. (%s)", error, "error"))
-        return nil, error
-    end
+    fs_t, error = fs_entry.new("..", directory, "directory")
     table.insert(dir_fs, fs_t)
 
-    local show_file = false
     -- scan the rest of the files
     while true do
         -- get filename and filetype
@@ -146,10 +132,8 @@ function fs_entry.get_directory(directory)
         end
 
         -- get fullpath of the file.
-        local filepath = fs.join_paths(directory, filename)
-        fs_t, error = fs_entry.new(filepath, directory, filetype)
+        fs_t, error = fs_entry.new(filename, directory, filetype)
         if fs_t == nil then
-            vim.notify(string.format('Dired: error while populating fs_entry for "%s" (%s)', filename, error), "error")
             return nil, error
         end
 
@@ -160,7 +144,7 @@ function fs_entry.get_directory(directory)
 
     dir_fs.size = dir_size
     -- return the list of files.
-    fs_entry.cache[directory] = dir_fs
+    -- fs_entry.cache[directory] = dir_fs
     return dir_fs
 end
 
