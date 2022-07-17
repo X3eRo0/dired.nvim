@@ -100,7 +100,12 @@ function fs_entry.new(filepath, parent_dir, filetype)
     return fs_t, err
 end
 
-function fs_entry.get_directory(directory, show_dot_dirs, show_hidden)
+fs_entry.cache = {}
+
+function fs_entry.get_directory(directory)
+    if fs_entry.cache[directory] ~= nil then
+        return fs_entry.cache[directory]
+    end
     -- array of fs_entries of all files in the directory
     local dir_fs = {}
     local fs_t = nil
@@ -114,24 +119,21 @@ function fs_entry.get_directory(directory, show_dot_dirs, show_hidden)
 
     local dir_size = 0
 
-    -- if dot dirs are to be shown add them to dir_fs
-    if show_dot_dirs then
-        -- append the "." directory
-        fs_t, error = fs_entry.new(fs.join_paths(directory, "."), directory, "directory")
-        if fs_t == nil then
-            vim.notify(string.format("Dired: could not populate fs_entry for dot directories. (%s)", error, "error"))
-            return nil, error
-        end
-        table.insert(dir_fs, fs_t)
-
-        -- append the ".." directory
-        fs_t, error = fs_entry.new(fs.join_paths(directory, ".."), directory, "directory")
-        if fs_t == nil then
-            vim.notify(string.format("Dired: could not populate fs_entry for dot directories. (%s)", error, "error"))
-            return nil, error
-        end
-        table.insert(dir_fs, fs_t)
+    -- append the "." directory
+    fs_t, error = fs_entry.new(fs.join_paths(directory, "."), directory, "directory")
+    if fs_t == nil then
+        vim.notify(string.format("Dired: could not populate fs_entry for dot directories. (%s)", error, "error"))
+        return nil, error
     end
+    table.insert(dir_fs, fs_t)
+
+    -- append the ".." directory
+    fs_t, error = fs_entry.new(fs.join_paths(directory, ".."), directory, "directory")
+    if fs_t == nil then
+        vim.notify(string.format("Dired: could not populate fs_entry for dot directories. (%s)", error, "error"))
+        return nil, error
+    end
+    table.insert(dir_fs, fs_t)
 
     local show_file = false
     -- scan the rest of the files
@@ -143,40 +145,27 @@ function fs_entry.get_directory(directory, show_dot_dirs, show_hidden)
             break
         end
 
-        if fs.is_hidden(filename) and show_hidden then
-            show_file = true -- if show_hidden is true then show hidden files.
-        elseif not fs.is_hidden(filename) then
-            show_file = true -- if its not a hidden file then show anyways.
-        else
-            show_file = false -- don't show hidden files if show_hidden is false.
+        -- get fullpath of the file.
+        local filepath = fs.join_paths(directory, filename)
+        fs_t, error = fs_entry.new(filepath, directory, filetype)
+        if fs_t == nil then
+            vim.notify(string.format('Dired: error while populating fs_entry for "%s" (%s)', filename, error), "error")
+            return nil, error
         end
 
-        -- show files based on show_file flag
-        if show_file then
-            -- get fullpath of the file.
-            local filepath = fs.join_paths(directory, filename)
-            fs_t, error = fs_entry.new(filepath, directory, filetype)
-            if fs_t == nil then
-                vim.notify(
-                    string.format('Dired: error while populating fs_entry for "%s" (%s)', filename, error),
-                    "error"
-                )
-                return nil, error
-            end
-
-            dir_size = dir_size + fs_t.size
-            -- insert the fs_t in dir_fs
-            table.insert(dir_fs, fs_t)
-        end
+        dir_size = dir_size + fs_t.size
+        -- insert the fs_t in dir_fs
+        table.insert(dir_fs, fs_t)
     end
 
     dir_fs.size = dir_size
     -- return the list of files.
+    fs_entry.cache[directory] = dir_fs
     return dir_fs
 end
 
 -- function to format each component
-function fs_entry.format(dir_files)
+function fs_entry.format(dir_files, show_dot_dirs, show_hidden)
     -- components :
     --  1. permissions
     --  2. # of links
@@ -201,54 +190,69 @@ function fs_entry.format(dir_files)
         ftimelen = 0,
     }
 
+    local show_file = false
     for _, fs_t in ipairs(dir_files) do
         -- get formatted components
-        fs_comps = {
-            fs_t = fs_t,
-            permissions = M.get_permission_str(fs_t.mode),
-            nlinks = string.format("%d", fs_t.nlinks),
-            owner = fs_t.owner,
-            group = fs_t.group,
-            size = utils.get_short_size(fs_t.size),
-            month = utils.get_month(fs_t.stat),
-            day = utils.get_day(fs_t.stat),
-            ftime = utils.get_ftime(fs_t.stat),
-            filename = fs_t.filename,
-        }
 
-        -- calculate maximum widths for each component
-        -- length of permissions will always be same
-        max_widths.permlen = #fs_comps.permissions
-
-        if max_widths.linklen < #fs_comps.nlinks then
-            max_widths.linklen = #fs_comps.nlinks
+        show_file = false
+        if (fs_t.filename == "." or fs_t.filename == "..") and show_dot_dirs then
+            show_file = true
+        elseif fs.is_hidden(fs_t.filename) and show_hidden then
+            show_file = true
+        elseif not fs.is_hidden(fs_t.filename) then
+            show_file = true
+        else
+            show_file = false
         end
 
-        if max_widths.ownerlen < #fs_comps.owner then
-            max_widths.ownerlen = #fs_comps.owner
-        end
+        if show_file == true then
+            local fs_comps = {
+                fs_t = fs_t,
+                permissions = M.get_permission_str(fs_t.mode),
+                nlinks = string.format("%d", fs_t.nlinks),
+                owner = fs_t.owner,
+                group = fs_t.group,
+                size = utils.get_short_size(fs_t.size),
+                month = utils.get_month(fs_t.stat),
+                day = utils.get_day(fs_t.stat),
+                ftime = utils.get_ftime(fs_t.stat),
+                filename = fs_t.filename,
+            }
 
-        if max_widths.grouplen < #fs_comps.group then
-            max_widths.grouplen = #fs_comps.group
-        end
+            -- calculate maximum widths for each component
+            -- length of permissions will always be same
+            max_widths.permlen = #fs_comps.permissions
 
-        if max_widths.sizelen < #fs_comps.size then
-            max_widths.sizelen = #fs_comps.size
-        end
+            if max_widths.linklen < #fs_comps.nlinks then
+                max_widths.linklen = #fs_comps.nlinks
+            end
 
-        if max_widths.monthlen < #fs_comps.month then
-            max_widths.monthlen = #fs_comps.month
-        end
+            if max_widths.ownerlen < #fs_comps.owner then
+                max_widths.ownerlen = #fs_comps.owner
+            end
 
-        if max_widths.daylen < #fs_comps.day then
-            max_widths.daylen = #fs_comps.day
-        end
+            if max_widths.grouplen < #fs_comps.group then
+                max_widths.grouplen = #fs_comps.group
+            end
 
-        if max_widths.ftimelen < #fs_comps.ftime then
-            max_widths.ftimelen = #fs_comps.ftime
-        end
+            if max_widths.sizelen < #fs_comps.size then
+                max_widths.sizelen = #fs_comps.size
+            end
 
-        table.insert(comps_by_fs_t, fs_comps)
+            if max_widths.monthlen < #fs_comps.month then
+                max_widths.monthlen = #fs_comps.month
+            end
+
+            if max_widths.daylen < #fs_comps.day then
+                max_widths.daylen = #fs_comps.day
+            end
+
+            if max_widths.ftimelen < #fs_comps.ftime then
+                max_widths.ftimelen = #fs_comps.ftime
+            end
+
+            table.insert(comps_by_fs_t, fs_comps)
+        end
     end
 
     -- calculate where to place cursor?

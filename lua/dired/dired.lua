@@ -7,7 +7,7 @@ local funcs = require("dired.functions")
 local M = {}
 
 -- initialize dired buffer
-function M.init_dired(history, sp, update_history)
+function M.init_dired()
     -- preserve altbuffer
     local altbuf = vim.fn.bufnr("#")
     local path = fs.get_simplified_path(vim.fn.expand("%"))
@@ -15,28 +15,6 @@ function M.init_dired(history, sp, update_history)
     vim.g.current_dired_path = path
     -- set buffer name to path
     vim.api.nvim_buf_set_name(0, path) -- 0 is current buffer
-
-    -- if history stack is nil then initialize
-    -- history stack and stack pointer
-    if history == nil then
-        history = {}
-        sp = 0
-    end
-
-    if update_history then
-        -- empty the history
-        while sp < #history do
-            table.remove(history)
-        end
-
-        if path ~= history[sp] then
-            table.insert(history, path)
-            sp = sp + 1
-        end
-    end
-
-    vim.b.dired_history = history
-    vim.b.dired_history_sp = sp
 
     vim.bo.filetype = "dired"
     vim.bo.buftype = "acwrite"
@@ -67,9 +45,8 @@ function M.open_dir(path)
         keep_alt = "keepalt"
     end
 
-    local history, sp = vim.b.dired_history, vim.b.dired_history_sp
     vim.cmd(string.format("%s noautocmd edit %s", keep_alt, vim.fn.fnameescape(path)))
-    M.init_dired(history, sp, true)
+    M.init_dired()
 end
 
 -- open a file or traverse inside a directory
@@ -86,7 +63,7 @@ function M.enter_dir()
         vim.api.nvim_err_writeln("Dired: Invalid operation make sure cursor is placed on a file/directory.")
         return
     end
-    local dir_files = ls.fs_entry.get_directory(dir, vim.g.dired_show_dot_dirs, vim.g.dired_show_hidden)
+    local dir_files = ls.fs_entry.get_directory(dir)
     local file = ls.get_file_by_filename(dir_files, filename)
     if file == nil then
         vim.api.nvim_err_writeln(string.format("Dired: invalid filename (%s) for file.", filename))
@@ -99,10 +76,8 @@ function M.enter_dir()
         vim.cmd(string.format("keepalt %s %s", cmd, vim.fn.fnameescape(file.filepath)))
     end
 
-    local history, sp = vim.b.dired_history, vim.b.dired_history_sp
-
     if file.filetype == "directory" then
-        M.init_dired(history, sp, true)
+        M.init_dired()
     end
 
     -- if file is a directory then enter inside the directory
@@ -113,22 +88,19 @@ end
 -- toggle between showing hidden files
 function M.toggle_hidden_files()
     vim.g.dired_show_hidden = not vim.g.dired_show_hidden
-    local history, sp = vim.b.dired_history, vim.b.dired_history_sp
-    M.init_dired(history, sp, true)
+    M.init_dired()
 end
 
 -- change the sort order
 function M.toggle_sort_order()
     vim.g.dired_sort_order = config.get_next_sort_order()
-    local history, sp = vim.b.dired_history, vim.b.dired_history_sp
-    M.init_dired(history, sp, true)
+    display.render(vim.g.current_dired_path)
 end
 
 -- change colors
 function M.toggle_colors()
     vim.g.dired_show_colors = not vim.g.dired_show_colors
-    local history, sp = vim.b.dired_history, vim.b.dired_history_sp
-    M.init_dired(history, sp, true)
+    display.render(vim.g.current_dired_path)
 end
 
 -- rename a file
@@ -140,16 +112,16 @@ function M.rename_file()
         vim.api.nvim_err_writeln("Dired: Invalid operation make sure cursor is placed on a file/directory.")
         return
     end
-    local dir_files = ls.fs_entry.get_directory(dir, vim.g.dired_show_dot_dirs, vim.g.dired_show_hidden)
+    local dir_files = ls.fs_entry.get_directory(dir)
     local file = ls.get_file_by_filename(dir_files, filename)
     funcs.rename_file(file)
-    M.init_dired(vim.b.dired_history, vim.b.dired_history_sp, true)
+    display.render(vim.g.current_dired_path)
 end
 
 -- create a file
 function M.create_file()
     funcs.create_file()
-    M.init_dired(vim.b.dired_history, vim.b.dired_history_sp, true)
+    display.render(vim.g.current_dired_path)
 end
 
 -- delete a file
@@ -161,10 +133,10 @@ function M.delete_file()
         vim.api.nvim_err_writeln("Dired: Invalid operation make sure cursor is placed on a file/directory.")
         return
     end
-    local dir_files = ls.fs_entry.get_directory(dir, vim.g.dired_show_dot_dirs, vim.g.dired_show_hidden)
+    local dir_files = ls.fs_entry.get_directory(dir)
     local file = ls.get_file_by_filename(dir_files, filename)
     funcs.delete_file(file)
-    M.init_dired(vim.b.dired_history, vim.b.dired_history_sp, true)
+    display.render(vim.g.current_dired_path)
 end
 
 return M

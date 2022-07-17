@@ -35,8 +35,8 @@ function M.is_directory(filepath)
 end
 
 -- is filepath a hidden directory/file
-function M.is_hidden(filepath)
-    return string.sub(filepath, 1, 1) == "."
+function M.is_hidden(filename)
+    return string.sub(filename, 1, 1) == "."
 end
 
 -- get filename from absolute path

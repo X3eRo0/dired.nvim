@@ -41,7 +41,7 @@ end
 
 function M.get_directory_listing(directory)
     local buffer_listing = {}
-    local dir_files, error = ls.fs_entry.get_directory(directory, vim.g.dired_show_dot_dirs, vim.g.dired_show_hidden)
+    local dir_files = ls.fs_entry.get_directory(directory)
     local dir_size = dir_files.size
     local dir_size_str = utils.get_short_size(dir_size)
     local info1, info2 = nil, nil
@@ -52,7 +52,8 @@ function M.get_directory_listing(directory)
         info1 = string.format("%s:", fs.get_simplified_path(directory))
         info2 = string.format("total used in directory %s:", dir_size_str)
     end
-    local formatted_components, cursor_x = ls.fs_entry.format(dir_files)
+    local formatted_components, cursor_x =
+        ls.fs_entry.format(dir_files, vim.g.dired_show_dot_dirs, vim.g.dired_show_hidden)
     table.insert(buffer_listing, { component = nil, line = info1 })
     table.insert(buffer_listing, { component = nil, line = info2 })
 
