@@ -1,6 +1,9 @@
 -- util functions
 local M = {}
 
+M.uid_cache = {}
+M.gid_cache = {}
+
 function M.str_split(s, delimiter)
     local result = {}
     for match in (s .. delimiter):gmatch("(.-)" .. delimiter) do
@@ -30,6 +33,10 @@ function M.getpwid(uid)
         return vim.loop.os_getenv("USERNAME")
     end
 
+    if M.uid_cache[uid] ~= nil then
+        return M.uid_cache[uid]
+    end
+
     local username = vim.fn.system(string.format("id -nu %d", uid))
     if not username then
         return nil
@@ -38,6 +45,7 @@ function M.getpwid(uid)
     if string.find(username, "no such user") then
         username = "<NULL>"
     end
+    M.uid_cache[uid] = username
     return username
 end
 
@@ -48,6 +56,10 @@ function M.getgroupname(gid)
         return vim.loop.os_gethostname()
     end
 
+    if M.gid_cache[gid] ~= nil then
+        return M.gid_cache[gid]
+    end
+
     local groupname = vim.fn.system(string.format("id -ng %d", gid))
     if not groupname then
         return nil
@@ -56,6 +68,8 @@ function M.getgroupname(gid)
     if string.find(groupname, "no such user") then
         groupname = "<NULL>"
     end
+
+    M.gid_cache[gid] = groupname
     return groupname
 end
 
