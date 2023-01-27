@@ -101,8 +101,6 @@ function M.delete_file(fs_t)
     else
         vim.notify("DiredDelete: File/Directory not deleted", "error")
     end
-    display.cursor_pos = vim.api.nvim_win_get_cursor(0)
-    display.goto_filename = ""
 end
 
 return M
