@@ -58,6 +58,7 @@ function M.enter_dir()
     local cmd = "edit"
 
     local dir = vim.g.current_dired_path
+    display.cursor_pos = {} -- reset cursor pos
     local filename = display.get_filename_from_listing(vim.api.nvim_get_current_line())
     if filename == nil then
         vim.api.nvim_err_writeln("Dired: Invalid operation make sure cursor is placed on a file/directory.")
@@ -87,6 +88,7 @@ end
 
 -- toggle between showing hidden files
 function M.toggle_hidden_files()
+    display.cursor_pos = {}
     vim.g.dired_show_hidden = not vim.g.dired_show_hidden
     M.init_dired()
 end
@@ -135,6 +137,8 @@ function M.delete_file()
     end
     local dir_files = ls.fs_entry.get_directory(dir)
     local file = ls.get_file_by_filename(dir_files, filename)
+    display.cursor_pos = vim.api.nvim_win_get_cursor(0)
+    display.goto_filename = ""
     funcs.delete_file(file)
     display.render(vim.g.current_dired_path)
 end

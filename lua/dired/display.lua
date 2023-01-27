@@ -11,6 +11,7 @@ local M = {}
 -- buffer to be flushed in neovim buffer
 M.buffer = {}
 M.cursor_pos = {}
+M.goto_filename = ""
 
 function M.clear()
     M.buffer = {}
@@ -57,12 +58,6 @@ function M.get_directory_listing(directory)
     table.insert(buffer_listing, { component = nil, line = info1 })
     table.insert(buffer_listing, { component = nil, line = info2 })
 
-    if #formatted_components > #buffer_listing then
-        M.cursor_pos = { 5, cursor_x } -- first file after the dot dirs
-    else
-        M.cursor_pos = { 4, cursor_x } -- on the ".." directory
-    end
-
     local listing = {}
     for _, comp in ipairs(formatted_components) do
         if vim.g.dired_show_colors then
@@ -73,6 +68,38 @@ function M.get_directory_listing(directory)
     end
 
     table.sort(listing, config.get_sort_order(vim.g.dired_sort_order))
+    if #formatted_components > #buffer_listing then
+        if #M.cursor_pos == 0 then
+            for i, fs_t in ipairs(listing) do
+                if fs_t.component.filename == ".." then
+                    if i < #listing then
+                        M.cursor_pos = { i + 1 + #buffer_listing, cursor_x }
+                    else
+                        M.cursor_pos = { i + #buffer_listing, cursor_x }
+                    end
+                    break
+                end
+            end
+        else
+            if M.goto_filename ~= "" then
+                for i, fs_t in ipairs(listing) do
+                    if fs_t.component.filename == M.goto_filename then
+                        M.cursor_pos = { i + #buffer_listing, cursor_x }
+                        M.goto_filename = ""
+                        break
+                    end
+                end
+            end
+        end
+    else
+        for i, fs_t in ipairs(listing) do
+            if fs_t.component.filename == ".." then
+                M.cursor_pos = { i + #buffer_listing, cursor_x }
+                break
+            end
+        end
+    end
+
     buffer_listing = utils.concatenate_tables(buffer_listing, listing)
     return buffer_listing
 end
@@ -96,11 +123,11 @@ function M.get_filename_from_listing(line)
     local idx = 0
     for i, word in ipairs(splitted) do
         if string.find(word, ":") then
-            idx = i+1
+            idx = i + 1
             break
         end
     end
-    for i=idx, #splitted do
+    for i = idx, #splitted do
         table.insert(filename, splitted[i])
     end
     return table.concat(filename, " ")

@@ -1,5 +1,6 @@
 local fs = require("dired.fs")
 local config = require("dired.config")
+local display = require("dired.display")
 
 local M = {}
 
@@ -17,6 +18,7 @@ function M.rename_file(fs_t)
         vim.notify(string.format('DiredRename: Could not rename "%s" to "%s".', fs_t.filename, new_name))
         return
     end
+    display.goto_filename = new_name
 end
 
 function M.create_file()
@@ -48,6 +50,7 @@ function M.create_file()
 
         vim.loop.fs_close(fd)
     end
+    display.goto_filename = filename
 end
 
 local function delete_files(path)
@@ -62,7 +65,7 @@ local function delete_files(path)
             break
         end
 
-        local new_cwd = M.join_paths(path, name)
+        local new_cwd = fs.join_paths(path, name)
 
         if t == "directory" then
             local success = delete_files(new_cwd)
@@ -98,6 +101,8 @@ function M.delete_file(fs_t)
     else
         vim.notify("DiredDelete: File/Directory not deleted", "error")
     end
+    display.cursor_pos = vim.api.nvim_win_get_cursor(0)
+    display.goto_filename = ""
 end
 
 return M
