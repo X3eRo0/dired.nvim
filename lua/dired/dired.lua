@@ -4,6 +4,7 @@ local display = require("dired.display")
 local config = require("dired.config")
 local funcs = require("dired.functions")
 local utils = require("dired.utils")
+local marker = require("dired.marker")
 
 local M = {}
 
@@ -91,6 +92,7 @@ end
 function M.toggle_hidden_files()
     display.cursor_pos = {}
     vim.g.dired_show_hidden = not vim.g.dired_show_hidden
+    vim.notify(string.format("dired_show_hidden: %s", vim.inspect(vim.g.dired_show_hidden)))
     M.init_dired()
 end
 
@@ -98,12 +100,14 @@ end
 function M.toggle_sort_order()
     vim.g.dired_sort_order = config.get_next_sort_order()
     display.render(vim.g.current_dired_path)
+    vim.notify(string.format("dired_sort_order: %s", vim.inspect(vim.g.dired_sort_order)))
 end
 
 -- change colors
 function M.toggle_colors()
     vim.g.dired_show_colors = not vim.g.dired_show_colors
     display.render(vim.g.current_dired_path)
+    vim.notify(string.format("dired_show_colors: %s", vim.inspect(vim.g.dired_show_colors)))
 end
 
 -- rename a file
@@ -119,12 +123,14 @@ function M.rename_file()
     local file = ls.get_file_by_filename(dir_files, filename)
     funcs.rename_file(file)
     display.render(vim.g.current_dired_path)
+    vim.notify("file renamed.")
 end
 
 -- create a file
 function M.create_file()
     funcs.create_file()
     display.render(vim.g.current_dired_path)
+    vim.notify("file created.")
 end
 
 -- delete a file
@@ -142,6 +148,7 @@ function M.delete_file()
     display.goto_filename = ""
     funcs.delete_file(file, true)
     display.render(vim.g.current_dired_path)
+    vim.notify(string.format("\"%s\" marked.", file.filename))
 end
 
 function M.delete_file_range()
@@ -175,6 +182,51 @@ function M.delete_file_range()
     else
         vim.notify(" DiredDelete: Marked files not deleted", "error")
     end
+    vim.notify(string.format("%d file deleted.", #files))
+end
+
+function M.mark_file()
+    local dir = nil
+    dir = vim.g.current_dired_path
+    local filename = display.get_filename_from_listing(vim.api.nvim_get_current_line())
+    if filename == nil then
+        vim.api.nvim_err_writeln("Dired: Invalid operation make sure the cursor is placed on a file/directory.")
+        return
+    end
+    local dir_files = ls.fs_entry.get_directory(dir)
+    local file = ls.get_file_by_filename(dir_files, filename)
+    display.cursor_pos = vim.api.nvim_win_get_cursor(0)
+    display.goto_filename = ""
+    marker.mark_file(file)
+    display.render(vim.g.current_dired_path)
+    vim.notify(string.format("\"%s\" marked.", file.filename))
+end
+
+
+function M.mark_file_range()
+    local dir = nil
+    dir = vim.g.current_dired_path
+    local lines = utils.get_visual_selection()
+    local files = {}
+    for _, line in ipairs(lines) do
+        local filename = display.get_filename_from_listing(line)
+        if filename == nil then
+            vim.api.nvim_err_writeln(
+                "Dired: Invalid operation make sure the selected/marked are of type file/directory."
+            )
+            return
+        end
+        table.insert(files, filename)
+    end
+    for _, filename in ipairs(files) do
+        local dir_files = ls.fs_entry.get_directory(dir)
+        local file = ls.get_file_by_filename(dir_files, filename)
+        display.cursor_pos = vim.api.nvim_win_get_cursor(0)
+        display.goto_filename = ""
+        marker.mark_file(file)
+    end
+    display.render(vim.g.current_dired_path)
+    vim.notify(string.format("%d files marked.", #files))
 end
 
 return M

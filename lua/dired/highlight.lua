@@ -20,6 +20,7 @@ M.SYMBOLIC_LINK = "DiredSymbolicLink"
 M.BROKEN_LINK = "DiredBrokenLink"
 M.SYMBOLIC_LINK_TARGET = "DiredSymbolicLinkTarget"
 M.BROKEN_LINK_TARGET = "DiredBrokenLinkTarget"
+M.MARKED_FILE = "DiredMarkedFile"
 
 local function dec_to_hex(n, chars)
     chars = chars or 6
@@ -186,6 +187,7 @@ M.setup = function()
     create_highlight_group(M.BROKEN_LINK, {}, "2e2e1f", "ff1a1a", "bold")
     create_highlight_group(M.BROKEN_LINK_TARGET, {}, "2e2e1f", "ff1a1a", "bold")
     create_highlight_group(M.FILE_EXECUTABLE, {}, nil, "5bd75b", "bold")
+    create_highlight_group(M.MARKED_FILE, {}, nil, "a8b103", "bold")
 end
 
 return M

@@ -14,6 +14,8 @@ M.rename = dired.rename_file
 M.create = dired.create_file
 M.delete = dired.delete_file
 M.delete_range = dired.delete_file_range
+M.mark = dired.mark_file
+M.mark_range = dired.mark_file_range
 M.toggle_hidden_files = dired.toggle_hidden_files
 M.toggle_sort_order = dired.toggle_sort_order
 M.toggle_colors = dired.toggle_colors
@@ -67,7 +69,9 @@ function M.setup(opts)
     vim.cmd([[command! -nargs=? -complete=dir Dired lua require'dired'.open(<q-args>)]])
     vim.cmd([[command! -nargs=? -complete=file DiredRename lua require'dired'.rename(<q-args>)]])
     vim.cmd([[command! -nargs=? -complete=file DiredDelete lua require'dired'.delete(<q-args>)]])
+    vim.cmd([[command! -nargs=? -complete=file DiredMark lua require'dired'.mark(<q-args>)]])
     vim.cmd([[command! DiredDeleteRange lua require'dired'.delete_range()]])
+    vim.cmd([[command! DiredMarkRange lua require'dired'.mark_range()]])
     vim.cmd([[command! DiredEnter lua require'dired'.enter(<q-args>)]])
     vim.cmd([[command! DiredCreate lua require'dired'.create()]])
     vim.cmd([[command! DiredToggleHidden lua require'dired'.toggle_hidden_files()]])
@@ -83,6 +87,8 @@ function M.setup(opts)
     map("", "<Plug>(dired_rename)", ":DiredRename<cr>", opt)
     map("", "<Plug>(dired_delete)", ":DiredDelete<cr>", opt)
     map("", "<Plug>(dired_delete_range)", ":<C-u>DiredDeleteRange<cr>", opt)
+    map("", "<Plug>(dired_mark)", ":DiredMark<cr>", opt)
+    map("", "<Plug>(dired_mark_range)", ":<C-u>DiredMarkRange<cr>", opt)
     map("", "<Plug>(dired_create)", ":DiredCreate<cr>", opt)
     map("", "<Plug>(dired_toggle_hidden)", ":DiredToggleHidden<cr>", opt)
     map("", "<Plug>(dired_toggle_sort_order)", ":DiredToggleSortOrder<cr>", opt)
@@ -106,6 +112,8 @@ function M.setup(opts)
             map(0, "n", "d", "<Plug>(dired_create)", opt)
             map(0, "n", "D", "<Plug>(dired_delete)", opt)
             map(0, "v", "D", "<Plug>(dired_delete_range)", opt)
+            map(0, "n", "M", "<Plug>(dired_mark)", opt)
+            map(0, "v", "M", "<Plug>(dired_mark_range)", opt)
             map(0, "n", ".", "<Plug>(dired_toggle_hidden)", opt)
             map(0, "n", ",", "<Plug>(dired_toggle_sort_order)", opt)
             map(0, "n", "c", "<Plug>(dired_toggle_colors)", opt)

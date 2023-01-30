@@ -1,6 +1,7 @@
 local hl = require("dired.highlight")
 local fs = require("dired.fs")
 local ut = require("dired.utils")
+local mk = require("dired.marker")
 
 local M = {}
 
@@ -42,7 +43,9 @@ function M.get_filename_color(component)
     -- a valid link or an broken symlink
     local fs_t = component.fs_t
 
-    if fs_t.filetype == "directory" then
+    if mk.is_marked(component.fs_t) then
+        return hl.MARKED_FILE
+    elseif fs_t.filetype == "directory" then
         -- if filetype is directory return DIRECTORY_NAME
         return hl.DIRECTORY_NAME
     elseif fs.is_hidden(fs_t.filename) then
