@@ -229,4 +229,39 @@ function M.mark_file_range()
     vim.notify(string.format("%d files marked.", #files))
 end
 
+function M.delete_marked()
+    local marked_files = marker.marked_files
+    local files_out_of_cwd = false
+    for i, fs_t in ipairs(marked_files) do
+        if fs_t.filename == nil then
+            vim.api.nvim_err_writeln(
+                "Dired: Invalid operation make sure the selected/marked are of type file/directory."
+            )
+            return
+        end
+        if fs.get_parent_path(fs_t.filepath) ~= vim.g.current_dired_path then
+            files_out_of_cwd = true
+            print(string.format('[%.4d] "%s" (file not in cwd %s, %s, %s)', i, fs_t.filename, fs.get_parent_path(fs_t.filepath), vim.g.current_dired_path, fs.get_parent_path(fs_t.filepath) == vim.g.current_dired_path))
+        else
+            print(string.format('[%.4d] "%s"', i, fs_t.filename))
+        end
+    end
+    if files_out_of_cwd then
+        print('[!] WARNING: You have files marked that are outside of your current working directory.')
+    end
+    local prompt = vim.fn.input("Confirm deletion {y(es),n(o),q(uit)}: ", "yes", "file")
+    prompt = string.lower(prompt)
+    if string.sub(prompt, 1, 1) == "y" then
+        for i, fs_t in ipairs(marked_files) do
+            display.cursor_pos = vim.api.nvim_win_get_cursor(0)
+            display.goto_filename = ""
+            funcs.delete_file(fs_t, false)
+        end
+        marker.marked_files = {}
+        display.render(vim.g.current_dired_path)
+    else
+        vim.notify(" DiredDelete: Marked files not deleted", "error")
+    end
+end
+
 return M
