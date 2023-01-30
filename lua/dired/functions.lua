@@ -15,7 +15,7 @@ function M.rename_file(fs_t)
     local new_path = fs.join_paths(fs_t.parent_dir, new_name)
     local success = vim.loop.fs_rename(old_path, new_path)
     if not success then
-        vim.notify(string.format('DiredRename: Could not rename "%s" to "%s".', fs_t.filename, new_name))
+        vim.notify(string.format(' DiredRename: Could not rename "%s" to "%s".', fs_t.filename, new_name))
         return
     end
     display.goto_filename = new_name
@@ -36,7 +36,7 @@ function M.create_file()
         local fd = vim.loop.fs_mkdir(fs.join_paths(dir, filename), default_dir_mode)
 
         if not fd then
-            vim.notify(string.format('DiredCreate: Could not create Directory "%s".', filename))
+            vim.notify(string.format(' DiredCreate: Could not create Directory "%s".', filename))
             return
         end
     else
@@ -44,7 +44,7 @@ function M.create_file()
         local fd, err = vim.loop.fs_open(fs.join_paths(dir, filename), "w+", default_file_mode)
 
         if not fd or err ~= nil then
-            vim.notify(string.format('DiredCreate: Could not create file "%s".', filename))
+            vim.notify(string.format(' DiredCreate: Could not create file "%s".', filename))
             return
         end
 
@@ -84,9 +84,17 @@ local function delete_files(path)
     return vim.loop.fs_rmdir(path)
 end
 
-function M.delete_file(fs_t)
+function M.delete_file(fs_t, ask)
     if fs_t.filename == "." or fs_t.filename == ".." then
-        vim.notify(string.format('Cannot Delete "%s"', fs_t.filepath), "error")
+        vim.notify(string.format(' Cannot Delete "%s"', fs_t.filepath), "error")
+        return
+    end
+    if ask ~= true then
+        if fs_t.filetype == "directory" then
+            delete_files(fs_t.filepath)
+        else
+            vim.loop.fs_unlink(fs_t.filepath)
+        end
         return
     end
     local prompt =
@@ -99,7 +107,7 @@ function M.delete_file(fs_t)
             vim.loop.fs_unlink(fs_t.filepath)
         end
     else
-        vim.notify("DiredDelete: File/Directory not deleted", "error")
+        vim.notify(" DiredDelete: File/Directory not deleted", "error")
     end
 end
 

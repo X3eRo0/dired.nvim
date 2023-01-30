@@ -13,6 +13,7 @@ M.init = dired.init_dired
 M.rename = dired.rename_file
 M.create = dired.create_file
 M.delete = dired.delete_file
+M.delete_range = dired.delete_file_range
 M.toggle_hidden_files = dired.toggle_hidden_files
 M.toggle_sort_order = dired.toggle_sort_order
 M.toggle_colors = dired.toggle_colors
@@ -66,6 +67,7 @@ function M.setup(opts)
     vim.cmd([[command! -nargs=? -complete=dir Dired lua require'dired'.open(<q-args>)]])
     vim.cmd([[command! -nargs=? -complete=file DiredRename lua require'dired'.rename(<q-args>)]])
     vim.cmd([[command! -nargs=? -complete=file DiredDelete lua require'dired'.delete(<q-args>)]])
+    vim.cmd([[command! DiredDeleteRange lua require'dired'.delete_range()]])
     vim.cmd([[command! DiredEnter lua require'dired'.enter(<q-args>)]])
     vim.cmd([[command! DiredCreate lua require'dired'.create()]])
     vim.cmd([[command! DiredToggleHidden lua require'dired'.toggle_hidden_files()]])
@@ -76,14 +78,15 @@ function M.setup(opts)
     -- setup keybinds
     local map = vim.api.nvim_set_keymap
     local opt = { unique = true, silent = true, noremap = true }
-    map("", "<Plug>(dired_up)", "<cmd>execute 'Dired ..'<cr>", opt)
-    map("", "<Plug>(dired_enter)", "<cmd>execute 'DiredEnter'<cr>", opt)
-    map("", "<Plug>(dired_rename)", "<cmd>execute 'DiredRename'<cr>", opt)
-    map("", "<Plug>(dired_delete)", "<cmd>execute 'DiredDelete'<cr>", opt)
-    map("", "<Plug>(dired_create)", "<cmd>execute 'DiredCreate'<cr>", opt)
-    map("", "<Plug>(dired_toggle_hidden)", "<cmd>execute 'DiredToggleHidden'<cr>", opt)
-    map("", "<Plug>(dired_toggle_sort_order)", "<cmd>execute 'DiredToggleSortOrder'<cr>", opt)
-    map("", "<Plug>(dired_toggle_colors)", "<cmd>execute 'DiredToggleColors'<cr>", opt)
+    map("", "<Plug>(dired_up)", ":Dired ..<cr>", opt)
+    map("", "<Plug>(dired_enter)", ":DiredEnter<cr>", opt)
+    map("", "<Plug>(dired_rename)", ":DiredRename<cr>", opt)
+    map("", "<Plug>(dired_delete)", ":DiredDelete<cr>", opt)
+    map("", "<Plug>(dired_delete_range)", ":<C-u>DiredDeleteRange<cr>", opt)
+    map("", "<Plug>(dired_create)", ":DiredCreate<cr>", opt)
+    map("", "<Plug>(dired_toggle_hidden)", ":DiredToggleHidden<cr>", opt)
+    map("", "<Plug>(dired_toggle_sort_order)", ":DiredToggleSortOrder<cr>", opt)
+    map("", "<Plug>(dired_toggle_colors)", ":DiredToggleColors<cr>", opt)
 
     if vim.fn.mapcheck("-", "n") == "" and not vim.fn.hasmapto("<Plug>(dired_up)", "n") then
         map("n", "-", "<Plug>(dired_up)", { silent = true })
@@ -102,6 +105,7 @@ function M.setup(opts)
             map(0, "n", "R", "<Plug>(dired_rename)", opt)
             map(0, "n", "d", "<Plug>(dired_create)", opt)
             map(0, "n", "D", "<Plug>(dired_delete)", opt)
+            map(0, "v", "D", "<Plug>(dired_delete_range)", opt)
             map(0, "n", ".", "<Plug>(dired_toggle_hidden)", opt)
             map(0, "n", ",", "<Plug>(dired_toggle_sort_order)", opt)
             map(0, "n", "c", "<Plug>(dired_toggle_colors)", opt)

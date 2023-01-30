@@ -3,6 +3,7 @@ local ls = require("dired.ls")
 local display = require("dired.display")
 local config = require("dired.config")
 local funcs = require("dired.functions")
+local utils = require("dired.utils")
 
 local M = {}
 
@@ -132,15 +133,48 @@ function M.delete_file()
     dir = vim.g.current_dired_path
     local filename = display.get_filename_from_listing(vim.api.nvim_get_current_line())
     if filename == nil then
-        vim.api.nvim_err_writeln("Dired: Invalid operation make sure cursor is placed on a file/directory.")
+        vim.api.nvim_err_writeln("Dired: Invalid operation make sure the cursor is placed on a file/directory.")
         return
     end
     local dir_files = ls.fs_entry.get_directory(dir)
     local file = ls.get_file_by_filename(dir_files, filename)
     display.cursor_pos = vim.api.nvim_win_get_cursor(0)
     display.goto_filename = ""
-    funcs.delete_file(file)
+    funcs.delete_file(file, true)
     display.render(vim.g.current_dired_path)
+end
+
+function M.delete_file_range()
+    local dir = nil
+    dir = vim.g.current_dired_path
+    local lines = utils.get_visual_selection()
+    print(string.format("%d files marked for deletion:", #lines))
+    local files = {}
+    for _, line in ipairs(lines) do
+        local filename = display.get_filename_from_listing(line)
+        if filename == nil then
+            vim.api.nvim_err_writeln(
+                "Dired: Invalid operation make sure the selected/marked are of type file/directory."
+            )
+            return
+        end
+        table.insert(files, filename)
+        print(string.format('[%.4d] "%s"', _, filename))
+    end
+    local prompt = vim.fn.input("Confirm deletion {y(es),n(o),q(uit)}: ", "yes", "file")
+    prompt = string.lower(prompt)
+    if string.sub(prompt, 1, 1) == "y" then
+        for _, filename in ipairs(files) do
+            local dir_files = ls.fs_entry.get_directory(dir)
+            local file = ls.get_file_by_filename(dir_files, filename)
+            display.cursor_pos = vim.api.nvim_win_get_cursor(0)
+            display.goto_filename = ""
+            funcs.delete_file(file, false)
+        end
+        display.render(vim.g.current_dired_path)
+    else
+        vim.notify(" DiredDelete: Marked files not deleted", "error")
+    end
 end
 
 return M
