@@ -123,14 +123,12 @@ function M.rename_file()
     local file = ls.get_file_by_filename(dir_files, filename)
     funcs.rename_file(file)
     display.render(vim.g.current_dired_path)
-    vim.notify("file renamed.")
 end
 
 -- create a file
 function M.create_file()
     funcs.create_file()
     display.render(vim.g.current_dired_path)
-    vim.notify("file created.")
 end
 
 -- delete a file
@@ -182,7 +180,6 @@ function M.delete_file_range()
     else
         vim.notify(" DiredDelete: Marked files not deleted", "error")
     end
-    vim.notify(string.format("%d file deleted.", #files))
 end
 
 function M.mark_file()
@@ -216,7 +213,9 @@ function M.mark_file_range()
             )
             return
         end
-        table.insert(files, filename)
+        if filename ~= "." or filename ~= ".." then
+            table.insert(files, filename)
+        end
     end
     for _, filename in ipairs(files) do
         local dir_files = ls.fs_entry.get_directory(dir)
@@ -239,9 +238,9 @@ function M.delete_marked()
             )
             return
         end
-        if fs.get_parent_path(fs_t.filepath) ~= vim.g.current_dired_path then
+        if fs.get_absolute_path(fs.get_parent_path(fs_t.filepath)) ~= fs.get_absolute_path(vim.g.current_dired_path) then
             files_out_of_cwd = true
-            print(string.format('[%.4d] "%s" (file not in cwd %s, %s, %s)', i, fs_t.filename, fs.get_parent_path(fs_t.filepath), vim.g.current_dired_path, fs.get_parent_path(fs_t.filepath) == vim.g.current_dired_path))
+            print(string.format('[%.4d] "%s" (file not in cwd)', i, fs_t.filename))
         else
             print(string.format('[%.4d] "%s"', i, fs_t.filename))
         end
@@ -259,8 +258,6 @@ function M.delete_marked()
         end
         marker.marked_files = {}
         display.render(vim.g.current_dired_path)
-    else
-        vim.notify(" DiredDelete: Marked files not deleted", "error")
     end
 end
 

@@ -1,3 +1,5 @@
+local fs = require('dired.fs')
+
 local M = {}
 
 M.marked_files = {}
