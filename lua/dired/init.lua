@@ -9,6 +9,8 @@ local M = {}
 
 M.open = dired.open_dir
 M.enter = dired.enter_dir
+M.goback = dired.go_back
+M.goup = dired.go_up
 M.init = dired.init_dired
 M.rename = dired.rename_file
 M.create = dired.create_file
@@ -74,7 +76,9 @@ function M.setup(opts)
     vim.cmd([[command! DiredDeleteRange lua require'dired'.delete_range()]])
     vim.cmd([[command! DiredDeleteMarked lua require'dired'.delete_marked()]])
     vim.cmd([[command! DiredMarkRange lua require'dired'.mark_range()]])
-    vim.cmd([[command! DiredEnter lua require'dired'.enter(<q-args>)]])
+    vim.cmd([[command! DiredGoBack lua require'dired'.goback()]])
+    vim.cmd([[command! DiredGoUp lua require'dired'.goup()]])
+    vim.cmd([[command! DiredEnter lua require'dired'.enter()]])
     vim.cmd([[command! DiredCreate lua require'dired'.create()]])
     vim.cmd([[command! DiredToggleHidden lua require'dired'.toggle_hidden_files()]])
     vim.cmd([[command! DiredToggleSortOrder lua require'dired'.toggle_sort_order()]])
@@ -84,7 +88,8 @@ function M.setup(opts)
     -- setup keybinds
     local map = vim.api.nvim_set_keymap
     local opt = { unique = true, silent = true, noremap = true }
-    map("", "<Plug>(dired_up)", ":Dired ..<cr>", opt)
+    map("", "<Plug>(dired_back)", ":DiredGoBack<cr>", opt)
+    map("", "<Plug>(dired_up)", ":DiredGoUp<cr>", opt)
     map("", "<Plug>(dired_enter)", ":DiredEnter<cr>", opt)
     map("", "<Plug>(dired_rename)", ":DiredRename<cr>", opt)
     map("", "<Plug>(dired_delete)", ":DiredDelete<cr>", opt)
@@ -97,8 +102,8 @@ function M.setup(opts)
     map("", "<Plug>(dired_toggle_sort_order)", ":DiredToggleSortOrder<cr>", opt)
     map("", "<Plug>(dired_toggle_colors)", ":DiredToggleColors<cr>", opt)
 
-    if vim.fn.mapcheck("-", "n") == "" and not vim.fn.hasmapto("<Plug>(dired_up)", "n") then
-        map("n", "-", "<Plug>(dired_up)", { silent = true })
+    if vim.fn.mapcheck("-", "n") == "" and not vim.fn.hasmapto("<Plug>(dired_back)", "n") then
+        map("n", "-", "<Plug>(dired_back)", { silent = true })
     end
 
     -- set dired keybinds
@@ -110,7 +115,8 @@ function M.setup(opts)
         pattern = "dired",
         callback = function()
             map(0, "n", "<cr>", "<Plug>(dired_enter)", opt)
-            map(0, "n", "-", "<Plug>(dired_up)", opt)
+            map(0, "n", "-", "<Plug>(dired_back)", opt)
+            map(0, "n", "_", "<Plug>(dired_up)", opt)
             map(0, "n", "R", "<Plug>(dired_rename)", opt)
             map(0, "n", "d", "<Plug>(dired_create)", opt)
             map(0, "n", "D", "<Plug>(dired_delete)", opt)
@@ -129,7 +135,7 @@ function M.setup(opts)
     -- open dired when opening a directory
     vim.api.nvim_create_autocmd("BufEnter", {
         pattern = "*",
-        command = "if isdirectory(expand('%')) && !&modified | execute 'lua require(\"dired\").init(vim.b.dired_history, vim.b.dired_history_sp, true)' | endif",
+        command = "if isdirectory(expand('%')) && !&modified | execute 'lua require(\"dired\").init()' | endif",
         group = dired_group,
     })
 

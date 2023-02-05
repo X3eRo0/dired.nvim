@@ -70,6 +70,7 @@ function M.get_directory_listing(directory)
     table.sort(listing, config.get_sort_order(vim.g.dired_sort_order))
     if #formatted_components > #buffer_listing then
         if #M.cursor_pos == 0 then
+            -- when M.cursor_pos is not populated
             for i, fs_t in ipairs(listing) do
                 if fs_t.component.filename == ".." then
                     if i < #listing then
@@ -81,11 +82,20 @@ function M.get_directory_listing(directory)
                 end
             end
         else
+            -- if M.cursor is populated
             if M.goto_filename ~= "" then
                 for i, fs_t in ipairs(listing) do
                     if fs_t.component.filename == M.goto_filename then
                         M.cursor_pos = { i + #buffer_listing, cursor_x }
                         M.goto_filename = ""
+                        break
+                    end
+                end
+            elseif M.goto_filename == "" then
+                M.goto_filename = ".."
+                for i, fs_t in ipairs(listing) do
+                    if fs_t.component.filename == ".." then
+                        M.cursor_pos = { i + 1 + #buffer_listing, cursor_x }
                         break
                     end
                 end
@@ -118,7 +128,7 @@ function M.display_dired_listing(directory)
 end
 
 function M.get_filename_from_listing(line)
-    local splitted = utils.str_split(line, " ")
+    local splitted = utils.str_split(line, " ", true)
     local filename = {}
     local idx = 0
     for i, word in ipairs(splitted) do

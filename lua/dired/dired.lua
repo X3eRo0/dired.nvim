@@ -5,6 +5,7 @@ local config = require("dired.config")
 local funcs = require("dired.functions")
 local utils = require("dired.utils")
 local marker = require("dired.marker")
+local history = require("dired.history")
 
 local M = {}
 
@@ -13,6 +14,12 @@ function M.init_dired()
     -- preserve altbuffer
     local altbuf = vim.fn.bufnr("#")
     local path = fs.get_simplified_path(vim.fn.expand("%"))
+
+    if vim.g.current_dired_path == nil then
+        vim.g.current_dired_path = path
+    end
+
+
     -- set current path
     vim.g.current_dired_path = path
     -- set buffer name to path
@@ -47,6 +54,7 @@ function M.open_dir(path)
         keep_alt = "keepalt"
     end
 
+    history.push_path(vim.g.current_dired_path)
     vim.cmd(string.format("%s noautocmd edit %s", keep_alt, vim.fn.fnameescape(path)))
     M.init_dired()
 end
@@ -56,8 +64,6 @@ function M.enter_dir()
     if vim.bo.filetype ~= "dired" then
         return
     end
-
-    local cmd = "edit"
 
     local dir = vim.g.current_dired_path
     display.cursor_pos = {} -- reset cursor pos
@@ -74,18 +80,30 @@ function M.enter_dir()
     end
 
     if file.filetype == "directory" then
-        vim.cmd(string.format("keepalt noautocmd %s %s", cmd, vim.fn.fnameescape(file.filepath)))
+        vim.cmd(string.format("keepalt noautocmd edit %s", vim.fn.fnameescape(file.filepath)))
     else
-        vim.cmd(string.format("keepalt %s %s", cmd, vim.fn.fnameescape(file.filepath)))
+        vim.cmd(string.format("keepalt edit %s", vim.fn.fnameescape(file.filepath)))
     end
 
     if file.filetype == "directory" then
+        history.push_path(vim.g.current_dired_path)
         M.init_dired()
     end
 
     -- if file is a directory then enter inside the directory
     -- if file is just a normal file then replace the dired buffer
     -- with that file
+end
+
+function M.go_back()
+    local current_path = vim.g.current_dired_path
+    display.goto_filename = fs.get_filename(current_path)
+    M.open_dir(fs.get_parent_path(current_path))
+end
+
+function M.go_up()
+    local last_path = history.pop_path()
+    M.open_dir(last_path)
 end
 
 -- toggle between showing hidden files
@@ -146,14 +164,13 @@ function M.delete_file()
     display.goto_filename = ""
     funcs.delete_file(file, true)
     display.render(vim.g.current_dired_path)
-    vim.notify(string.format("\"%s\" marked.", file.filename))
 end
 
 function M.delete_file_range()
     local dir = nil
     dir = vim.g.current_dired_path
     local lines = utils.get_visual_selection()
-    print(string.format("%d files marked for deletion:", #lines))
+    vim.notify(string.format("%d files marked for deletion:", #lines))
     local files = {}
     for _, line in ipairs(lines) do
         local filename = display.get_filename_from_listing(line)
@@ -164,21 +181,21 @@ function M.delete_file_range()
             return
         end
         table.insert(files, filename)
-        print(string.format('[%.4d] "%s"', _, filename))
+        print(string.format('   {%.2d: "%s"}', _, filename))
     end
     local prompt = vim.fn.input("Confirm deletion {y(es),n(o),q(uit)}: ", "yes", "file")
     prompt = string.lower(prompt)
-    if string.sub(prompt, 1, 1) == "y" then
+    if string.sub(prompt, 1, 3) == "yes" then
         for _, filename in ipairs(files) do
             local dir_files = ls.fs_entry.get_directory(dir)
             local file = ls.get_file_by_filename(dir_files, filename)
             display.cursor_pos = vim.api.nvim_win_get_cursor(0)
-            display.goto_filename = ""
             funcs.delete_file(file, false)
         end
+        display.goto_filename = ""
         display.render(vim.g.current_dired_path)
-    else
-        vim.notify(" DiredDelete: Marked files not deleted", "error")
+    -- else
+    --     vim.notify(" DiredDelete: Marked files not deleted", "error")
     end
 end
 
@@ -196,9 +213,8 @@ function M.mark_file()
     display.goto_filename = ""
     marker.mark_file(file)
     display.render(vim.g.current_dired_path)
-    vim.notify(string.format("\"%s\" marked.", file.filename))
+    -- vim.notify(string.format("\"%s\" marked.", file.filename))
 end
-
 
 function M.mark_file_range()
     local dir = nil
@@ -221,15 +237,17 @@ function M.mark_file_range()
         local dir_files = ls.fs_entry.get_directory(dir)
         local file = ls.get_file_by_filename(dir_files, filename)
         display.cursor_pos = vim.api.nvim_win_get_cursor(0)
-        display.goto_filename = ""
+        -- print(filename, file)
         marker.mark_file(file)
     end
+    display.goto_filename = files[1]
     display.render(vim.g.current_dired_path)
-    vim.notify(string.format("%d files marked.", #files))
+    -- vim.notify(string.format("%d files marked.", #files))
 end
 
 function M.delete_marked()
     local marked_files = marker.marked_files
+    vim.notify(string.format("%d files marked for deletion:", #marked_files))
     local files_out_of_cwd = false
     for i, fs_t in ipairs(marked_files) do
         if fs_t.filename == nil then
@@ -238,27 +256,30 @@ function M.delete_marked()
             )
             return
         end
-        if fs.get_absolute_path(fs.get_parent_path(fs_t.filepath)) ~= fs.get_absolute_path(vim.g.current_dired_path) then
+        if
+            fs.get_absolute_path(fs.get_parent_path(fs_t.filepath)) ~= fs.get_absolute_path(vim.g.current_dired_path)
+        then
             files_out_of_cwd = true
-            print(string.format('[%.4d] "%s" (file not in cwd)', i, fs_t.filename))
+            print(string.format('   {%.2d: "%s"} (file not in cwd)', i, fs_t.filename))
         else
-            print(string.format('[%.4d] "%s"', i, fs_t.filename))
+            print(string.format('   {%.2d: "%s"}"', i, fs_t.filename))
         end
     end
     if files_out_of_cwd then
-        print('[!] WARNING: You have files marked that are outside of your current working directory.')
+        print("[!] WARNING: You have files marked that are outside of your current working directory.")
     end
     local prompt = vim.fn.input("Confirm deletion {y(es),n(o),q(uit)}: ", "yes", "file")
     prompt = string.lower(prompt)
-    if string.sub(prompt, 1, 1) == "y" then
+    if string.sub(prompt, 1, 3) == "yes" then
         for i, fs_t in ipairs(marked_files) do
             display.cursor_pos = vim.api.nvim_win_get_cursor(0)
             display.goto_filename = ""
             funcs.delete_file(fs_t, false)
         end
         marker.marked_files = {}
-        display.render(vim.g.current_dired_path)
     end
+    display.goto_filename = ""
+    display.render(vim.g.current_dired_path)
 end
 
 return M

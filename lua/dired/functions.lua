@@ -1,6 +1,7 @@
 local fs = require("dired.fs")
 local config = require("dired.config")
 local display = require("dired.display")
+local utils = require("dired.utils")
 
 local M = {}
 
@@ -31,8 +32,8 @@ function M.create_file()
 
     if filename:sub(-1, -1) == M.path_separator then
         -- create a directory
+        filename = filename:sub(1, -2)
         local dir = vim.g.current_dired_path
-        -- print(vim.inspect(M.join_paths(dir, filename)))
         local fd = vim.loop.fs_mkdir(fs.join_paths(dir, filename), default_dir_mode)
 
         if not fd then
@@ -100,7 +101,7 @@ function M.delete_file(fs_t, ask)
     local prompt =
         vim.fn.input(string.format("Confirm deletion of (%s) {y(es),n(o),q(uit)}: ", fs_t.filename), "yes", "file")
     prompt = string.lower(prompt)
-    if string.sub(prompt, 1, 1) == "y" then
+    if string.sub(prompt, 1, 3) == "yes" then
         if fs_t.filetype == "directory" then
             delete_files(fs_t.filepath)
         else

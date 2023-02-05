@@ -328,6 +328,9 @@ function M.get_colored_component_str(component)
 end
 
 function M.get_file_by_filename(dir_files, filename)
+    if string.find(filename, " -> ") then
+        filename = utils.str_split(filename, " -> ", true)[1]
+    end
     for _, fs_t in ipairs(dir_files) do
         if fs_t.filename == filename then
             return fs_t
