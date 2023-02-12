@@ -101,4 +101,96 @@ function M.get_symlink(filepath)
     return link
 end
 
+function M.do_delete(path)
+    local handle = vim.loop.fs_scandir(path)
+    if type(handle) == "string" then
+        return vim.api.nvim_err_writeln(handle)
+    end
+
+    while true do
+        local name, t = vim.loop.fs_scandir_next(handle)
+        if not name then
+            break
+        end
+
+        local new_cwd = fs.join_paths(path, name)
+
+        if t == "directory" then
+            local success = delete_files(new_cwd)
+            if not success then
+                return false
+            end
+        else
+            local success = vim.loop.fs_unlink(new_cwd)
+
+            if not success then
+                return false
+            end
+        end
+    end
+
+    return vim.loop.fs_rmdir(path)
+end
+
+function M.do_copy(source, destination)
+    local source_stats, handle
+    local success, errmsg
+
+    source_stats, errmsg = vim.loop.fs_stat(source)
+    if not source_stats then
+        vim.api.nvim_err_writeln("do_copy fs_stat '%s' failed '%s'", source, errmsg)
+        return false, errmsg
+    end
+
+    if source == destination then
+        vim.api.nvim_err_writeln("do_copy source and destination are the same, exiting early")
+        return true
+    end
+
+    if source_stats.type == "file" then
+        success, errmsg = vim.loop.fs_copyfile(source, destination)
+        if not success then
+            vim.api.nvim_err_writeln("do_copy fs_copyfile failed '%s'", errmsg)
+            return false, errmsg
+        end
+        return true
+    elseif source_stats.type == "directory" then
+        handle, errmsg = vim.loop.fs_scandir(source)
+        if type(handle) == "string" then
+            return false, handle
+        elseif not handle then
+            vim.api.nvim_err_writeln("do_copy fs_scandir '%s' failed '%s'", source, errmsg)
+            return false, errmsg
+        end
+
+        success, errmsg = vim.loop.fs_mkdir(destination, source_stats.mode)
+        if not success then
+            M.do_delete(destination)
+            success, errmsg = vim.loop.fs_mkdir(destination, source_stats.mode)
+            -- vim.api.nvim_err_writeln(string.format("do_copy fs_mkdir '%s' failed '%s'", destination, errmsg))
+            -- return false, errmsg
+        end
+
+        while true do
+            local name, _ = vim.loop.fs_scandir_next(handle)
+            if not name then
+                break
+            end
+
+            local new_name = M.join_paths(source, name)
+            local new_destination = M.join_paths(destination, name)
+            success, errmsg = M.do_copy(new_name, new_destination)
+            if not success then
+                return false, errmsg
+            end
+        end
+    else
+        errmsg = string.format("'%s' illegal file type '%s'", source, source_stats.type)
+        vim.api.nvim_err_writeln("do_copy %s", errmsg)
+        return false, errmsg
+    end
+
+    return true
+end
+
 return M

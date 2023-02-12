@@ -54,37 +54,6 @@ function M.create_file()
     display.goto_filename = filename
 end
 
-local function delete_files(path)
-    local handle = vim.loop.fs_scandir(path)
-    if type(handle) == "string" then
-        return vim.api.nvim_err_writeln(handle)
-    end
-
-    while true do
-        local name, t = vim.loop.fs_scandir_next(handle)
-        if not name then
-            break
-        end
-
-        local new_cwd = fs.join_paths(path, name)
-
-        if t == "directory" then
-            local success = delete_files(new_cwd)
-            if not success then
-                return false
-            end
-        else
-            local success = vim.loop.fs_unlink(new_cwd)
-
-            if not success then
-                return false
-            end
-        end
-    end
-
-    return vim.loop.fs_rmdir(path)
-end
-
 function M.delete_file(fs_t, ask)
     if fs_t.filename == "." or fs_t.filename == ".." then
         vim.notify(string.format(' Cannot Delete "%s"', fs_t.filepath), "error")
@@ -92,23 +61,21 @@ function M.delete_file(fs_t, ask)
     end
     if ask ~= true then
         if fs_t.filetype == "directory" then
-            delete_files(fs_t.filepath)
+            fs.do_delete(fs_t.filepath)
         else
             vim.loop.fs_unlink(fs_t.filepath)
         end
         return
     end
     local prompt =
-        vim.fn.input(string.format("Confirm deletion of (%s) {y(es),n(o),q(uit)}: ", fs_t.filename), "yes", "file")
+        vim.fn.input(string.format("Confirm deletion of (%s) {yes,n(o),q(uit)}: ", fs_t.filename), "yes", "file")
     prompt = string.lower(prompt)
     if string.sub(prompt, 1, 3) == "yes" then
         if fs_t.filetype == "directory" then
-            delete_files(fs_t.filepath)
+            fs.do_delete(fs_t.filepath)
         else
             vim.loop.fs_unlink(fs_t.filepath)
         end
-    else
-        vim.notify(" DiredDelete: File/Directory not deleted", "error")
     end
 end
 

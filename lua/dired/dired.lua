@@ -19,7 +19,6 @@ function M.init_dired()
         vim.g.current_dired_path = path
     end
 
-
     -- set current path
     vim.g.current_dired_path = path
     -- set buffer name to path
@@ -160,12 +159,18 @@ function M.delete_file()
     end
     local dir_files = ls.fs_entry.get_directory(dir)
     local file = ls.get_file_by_filename(dir_files, filename)
+    for i, fs_t in ipairs(marker.marked_files) do
+        if file == fs_t then
+            table.remove(marker.marked_files, i)
+        end
+    end
     display.cursor_pos = vim.api.nvim_win_get_cursor(0)
     display.goto_filename = ""
     funcs.delete_file(file, true)
     display.render(vim.g.current_dired_path)
 end
 
+-- delete selected files in current dired path
 function M.delete_file_range()
     local dir = nil
     dir = vim.g.current_dired_path
@@ -183,22 +188,31 @@ function M.delete_file_range()
         table.insert(files, filename)
         print(string.format('   {%.2d: "%s"}', _, filename))
     end
-    local prompt = vim.fn.input("Confirm deletion {y(es),n(o),q(uit)}: ", "yes", "file")
+    local prompt = vim.fn.input("Confirm deletion {yes,n(o),q(uit)}: ", "yes", "file")
     prompt = string.lower(prompt)
     if string.sub(prompt, 1, 3) == "yes" then
         for _, filename in ipairs(files) do
             local dir_files = ls.fs_entry.get_directory(dir)
             local file = ls.get_file_by_filename(dir_files, filename)
+            if not file then
+                return
+            end
+            for i, fs_t in ipairs(marker.marked_files) do
+                if file.filepath == fs_t.filepath then
+                    table.remove(marker.marked_files, i)
+                end
+            end
             display.cursor_pos = vim.api.nvim_win_get_cursor(0)
             funcs.delete_file(file, false)
         end
         display.goto_filename = ""
         display.render(vim.g.current_dired_path)
-    -- else
-    --     vim.notify(" DiredDelete: Marked files not deleted", "error")
+        -- else
+        --     vim.notify(" DiredDelete: Marked files not deleted", "error")
     end
 end
 
+-- mark single file
 function M.mark_file()
     local dir = nil
     dir = vim.g.current_dired_path
@@ -210,12 +224,13 @@ function M.mark_file()
     local dir_files = ls.fs_entry.get_directory(dir)
     local file = ls.get_file_by_filename(dir_files, filename)
     display.cursor_pos = vim.api.nvim_win_get_cursor(0)
-    display.goto_filename = ""
+    display.goto_filename = filename
     marker.mark_file(file)
     display.render(vim.g.current_dired_path)
     -- vim.notify(string.format("\"%s\" marked.", file.filename))
 end
 
+-- mark range of files
 function M.mark_file_range()
     local dir = nil
     dir = vim.g.current_dired_path
@@ -245,6 +260,7 @@ function M.mark_file_range()
     -- vim.notify(string.format("%d files marked.", #files))
 end
 
+-- delete marked files and update marked list
 function M.delete_marked()
     local marked_files = marker.marked_files
     vim.notify(string.format("%d files marked for deletion:", #marked_files))
@@ -268,15 +284,63 @@ function M.delete_marked()
     if files_out_of_cwd then
         print("[!] WARNING: You have files marked that are outside of your current working directory.")
     end
-    local prompt = vim.fn.input("Confirm deletion {y(es),n(o),q(uit)}: ", "yes", "file")
+    local prompt = vim.fn.input("Confirm deletion {yes,n(o),q(uit)}: ", "yes", "file")
     prompt = string.lower(prompt)
     if string.sub(prompt, 1, 3) == "yes" then
-        for i, fs_t in ipairs(marked_files) do
+        for _, fs_t in ipairs(marked_files) do
             display.cursor_pos = vim.api.nvim_win_get_cursor(0)
             display.goto_filename = ""
             funcs.delete_file(fs_t, false)
         end
         marker.marked_files = {}
+    end
+    display.goto_filename = ""
+    display.render(vim.g.current_dired_path)
+end
+
+-- copy marked files to current directory
+function M.copy_marked()
+    -- should we check if user is trying to copy paste in the same directory?
+    -- idk yet.
+    local marked_files = marker.marked_files
+    local curren_files = ls.fs_entry.get_directory(vim.g.current_dired_path)
+    local copy_files = {}
+
+    for _, fs_t in ipairs(marked_files) do
+        -- sanity check
+        if fs_t.filename == nil then
+            vim.api.nvim_err_writeln(
+                "Dired: Invalid operation make sure the selected/marked are of type file/directory."
+            )
+            return
+        end
+
+        -- check #1
+        if
+            fs.get_absolute_path(fs.get_parent_path(fs_t.filepath)) ~= fs.get_absolute_path(vim.g.current_dired_path)
+        then
+            -- check #2
+            local already_in_cwd = false
+            for _, ds_t in ipairs(curren_files) do
+                if fs_t.filename == ds_t.filename then
+                    local prompt =
+                        vim.fn.input(string.format('Overwrite "%s"? {yes,n(o),q(uit)}: ', fs_t.filename), "no")
+                    prompt = string.lower(prompt)
+                    already_in_cwd = true
+                    if string.sub(prompt, 1, 3) == "yes" then
+                        table.insert(copy_files, fs_t)
+                    end
+                    break
+                end
+            end
+            if not already_in_cwd then
+                table.insert(copy_files, fs_t)
+            end
+        end
+    end
+    marker.marked_files = {}
+    for _, fs_t in ipairs(copy_files) do
+        fs.do_copy(fs_t.filepath, fs.join_paths(vim.g.current_dired_path, fs_t.filename))
     end
     display.goto_filename = ""
     display.render(vim.g.current_dired_path)
