@@ -226,4 +226,14 @@ function M.bitxor(a, b)
     return r
 end
 
+function M.get_icon_by_filetype(filetype)
+    if filetype == "directory" then
+        return "📁"
+    elseif filetype == "link" then
+        return "➡️"
+    elseif filetype == "file" then
+        return "🗒️"
+    end
+end
+
 return M

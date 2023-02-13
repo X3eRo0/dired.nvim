@@ -68,5 +68,4 @@ Inside a directory buffer, there are the following keybindings:
 
 ## TODO
 
-1. Allow moving and copying of files.
-2. Allow changing file permissions.
+1. Allow changing file permissions.
