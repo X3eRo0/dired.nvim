@@ -113,10 +113,10 @@ function M.do_delete(path)
             break
         end
 
-        local new_cwd = fs.join_paths(path, name)
+        local new_cwd = M.join_paths(path, name)
 
         if t == "directory" then
-            local success = delete_files(new_cwd)
+            local success = M.do_delete(new_cwd)
             if not success then
                 return false
             end

@@ -2,9 +2,6 @@
 
 local utils = require("dired.utils")
 local fs = require("dired.fs")
-local colors = require("dired.colors")
-local nui_text = require("nui.text")
-
 local M = {}
 M.fs_entry = {}
 
@@ -266,66 +263,6 @@ function fs_entry.format(dir_files, show_dot_dirs, show_hidden)
     return comps_by_fs_t, cursor_x
 end
 
-function M.get_component_str(component)
-    return {
-        component = component,
-        line = string.format(
-            "%s %s %s %s %s %s %s %s %s",
-            component.permissions,
-            component.nlinks,
-            component.owner,
-            component.group,
-            component.size,
-            component.month,
-            component.day,
-            component.ftime,
-            component.filename
-        ),
-    }
-end
-
-function M.get_colored_component_str(component)
-    -- return nui_line
-    local permcolor = colors.get_permission_color()
-    local nlinkcolor = colors.get_nlinks_color()
-    local ownercolor = colors.get_owner_color()
-    local groupcolor = colors.get_group_color()
-    local sizecolor = colors.get_size_color()
-    local monthcolor = colors.get_month_color()
-    local daycolor = colors.get_day_color()
-    local ftimecolor = colors.get_ftime_color()
-    -- primary colors and secondary color in case its a symlink
-    local fcolor_p, fcolor_s = colors.get_filename_color(component)
-    local text_group = {
-        nui_text(component.permissions, permcolor),
-        nui_text(component.nlinks, nlinkcolor),
-        nui_text(component.owner, ownercolor),
-        nui_text(component.group, groupcolor),
-        nui_text(component.size, sizecolor),
-        nui_text(component.month, monthcolor),
-        nui_text(component.day, daycolor),
-        nui_text(component.ftime, ftimecolor),
-        nui_text(component.filename, fcolor_p),
-    }
-
-    if component.fs_t.filetype == "link" then
-        local linktarget = fs.get_symlink(component.fs_t.filepath)
-        table.insert(text_group, nui_text("->"))
-        table.insert(text_group, nui_text(linktarget, fcolor_s))
-    end
-
-    local line = {}
-    local seperator = nui_text(" ")
-    for i = 1, #text_group do
-        table.insert(line, text_group[i])
-        if i ~= #text_group then
-            table.insert(line, seperator)
-        end
-    end
-
-    -- returns component and formatted line
-    return { component = component, line = line }
-end
 
 function M.get_file_by_filename(dir_files, filename)
     if string.find(filename, " -> ") then

@@ -65,6 +65,15 @@ function M.concatenate_tables(table1, table2)
     return table1
 end
 
+function M.find(table, elem)
+    for i, e in ipairs(table) do
+        if e == elem then
+            return i
+        end
+    end
+    return nil
+end
+
 function M.getpwid(uid)
     -- using GNU id to get username because libuv
     -- does not have a function to return password

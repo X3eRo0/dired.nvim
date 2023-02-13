@@ -2,6 +2,8 @@ local hl = require("dired.highlight")
 local fs = require("dired.fs")
 local ut = require("dired.utils")
 local mk = require("dired.marker")
+local cb = require("dired.clipboard")
+local nt = require("nui.text")
 
 local M = {}
 
@@ -45,6 +47,10 @@ function M.get_filename_color(component)
 
     if mk.is_marked(component.fs_t) then
         return hl.MARKED_FILE
+    elseif cb.get_action(component.fs_t) == "copy" then
+        return hl.COPY_FILE
+    elseif cb.get_action(component.fs_t) == "move" then
+        return hl.MOVE_FILE
     elseif fs_t.filetype == "directory" then
         -- if filetype is directory return DIRECTORY_NAME
         return hl.DIRECTORY_NAME
@@ -78,6 +84,67 @@ function M.get_filename_color(component)
             return hl.FILE_NAME
         end
     end
+end
+
+function M.get_component_str(component)
+    return {
+        component = component,
+        line = string.format(
+            "%s %s %s %s %s %s %s %s %s",
+            component.permissions,
+            component.nlinks,
+            component.owner,
+            component.group,
+            component.size,
+            component.month,
+            component.day,
+            component.ftime,
+            component.filename
+        ),
+    }
+end
+
+function M.get_colored_component_str(component)
+    -- return nui_line
+    local permcolor = M.get_permission_color()
+    local nlinkcolor = M.get_nlinks_color()
+    local ownercolor = M.get_owner_color()
+    local groupcolor = M.get_group_color()
+    local sizecolor = M.get_size_color()
+    local monthcolor = M.get_month_color()
+    local daycolor = M.get_day_color()
+    local ftimecolor = M.get_ftime_color()
+    -- primary M.and secondary color in case its a symlink
+    local fcolor_p, fcolor_s = M.get_filename_color(component)
+    local text_group = {
+        nt(component.permissions, permcolor),
+        nt(component.nlinks, nlinkcolor),
+        nt(component.owner, ownercolor),
+        nt(component.group, groupcolor),
+        nt(component.size, sizecolor),
+        nt(component.month, monthcolor),
+        nt(component.day, daycolor),
+        nt(component.ftime, ftimecolor),
+        nt(component.filename, fcolor_p),
+    }
+
+    if component.fs_t.filetype == "link" then
+        local linktarget = fs.get_symlink(component.fs_t.filepath)
+        table.insert(text_group, nt("->"))
+        table.insert(text_group, nt(linktarget, fcolor_s))
+    end
+
+    local line = {}
+    local seperator = nt(" ")
+    for i = 1, #text_group do
+        table.insert(line, text_group[i])
+        if i ~= #text_group then
+            table.insert(line, seperator)
+        end
+    end
+
+    -- returns component and formatted line
+    return { component = component, line = line }
 end
 
 return M

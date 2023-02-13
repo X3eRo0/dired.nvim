@@ -5,6 +5,7 @@ local config = require("dired.config")
 local nui_line = require("nui.line")
 local nui_text = require("nui.text")
 local utils = require("dired.utils")
+local colors = require("dired.colors")
 local M = {}
 
 -- fill the buffer with directory contents
@@ -61,9 +62,9 @@ function M.get_directory_listing(directory)
     local listing = {}
     for _, comp in ipairs(formatted_components) do
         if vim.g.dired_show_colors then
-            table.insert(listing, ls.get_colored_component_str(comp))
+            table.insert(listing, colors.get_colored_component_str(comp))
         else
-            table.insert(listing, ls.get_component_str(comp))
+            table.insert(listing, colors.get_component_str(comp))
         end
     end
 
@@ -95,7 +96,11 @@ function M.get_directory_listing(directory)
                 M.goto_filename = ".."
                 for i, fs_t in ipairs(listing) do
                     if fs_t.component.filename == ".." then
-                        M.cursor_pos = { i + 1 + #buffer_listing, cursor_x }
+                        if i < #listing then
+                            M.cursor_pos = { i + 1 + #buffer_listing, cursor_x }
+                        else
+                            M.cursor_pos = { i + #buffer_listing, cursor_x }
+                        end
                         break
                     end
                 end

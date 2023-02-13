@@ -6,6 +6,7 @@ local funcs = require("dired.functions")
 local utils = require("dired.utils")
 local marker = require("dired.marker")
 local history = require("dired.history")
+local clipboard = require("dired.clipboard")
 
 local M = {}
 
@@ -117,7 +118,7 @@ end
 function M.toggle_sort_order()
     vim.g.dired_sort_order = config.get_next_sort_order()
     display.render(vim.g.current_dired_path)
-    vim.notify(string.format("dired_sort_order: %s", vim.inspect(vim.g.dired_sort_order)))
+    vim.notify(string.format("Dired by %s", vim.g.dired_sort_order))
 end
 
 -- change colors
@@ -298,52 +299,104 @@ function M.delete_marked()
     display.render(vim.g.current_dired_path)
 end
 
--- copy marked files to current directory
-function M.copy_marked()
-    -- should we check if user is trying to copy paste in the same directory?
-    -- idk yet.
-    local marked_files = marker.marked_files
-    local curren_files = ls.fs_entry.get_directory(vim.g.current_dired_path)
-    local copy_files = {}
+function M.clip_file(action)
+    local dir = nil
+    dir = vim.g.current_dired_path
+    local filename = display.get_filename_from_listing(vim.api.nvim_get_current_line())
+    if filename == nil then
+        vim.api.nvim_err_writeln("Dired: Invalid operation make sure the cursor is placed on a file/directory.")
+        return
+    end
+    local dir_files = ls.fs_entry.get_directory(dir)
+    local file = ls.get_file_by_filename(dir_files, filename)
+    display.cursor_pos = vim.api.nvim_win_get_cursor(0)
+    display.goto_filename = filename
+    clipboard.add_file(file, action)
+    display.render(vim.g.current_dired_path)
+    -- vim.notify(string.format("\"%s\" marked.", file.filename))
+end
 
-    for _, fs_t in ipairs(marked_files) do
-        -- sanity check
-        if fs_t.filename == nil then
+
+function M.clip_file_range(action)
+    local dir = nil
+    dir = vim.g.current_dired_path
+    local lines = utils.get_visual_selection()
+    local files = {}
+    for _, line in ipairs(lines) do
+        local filename = display.get_filename_from_listing(line)
+        if filename == nil then
             vim.api.nvim_err_writeln(
                 "Dired: Invalid operation make sure the selected/marked are of type file/directory."
             )
             return
         end
-
-        -- check #1
-        if
-            fs.get_absolute_path(fs.get_parent_path(fs_t.filepath)) ~= fs.get_absolute_path(vim.g.current_dired_path)
-        then
-            -- check #2
-            local already_in_cwd = false
-            for _, ds_t in ipairs(curren_files) do
-                if fs_t.filename == ds_t.filename then
-                    local prompt =
-                        vim.fn.input(string.format('Overwrite "%s"? {yes,n(o),q(uit)}: ', fs_t.filename), "no")
-                    prompt = string.lower(prompt)
-                    already_in_cwd = true
-                    if string.sub(prompt, 1, 3) == "yes" then
-                        table.insert(copy_files, fs_t)
-                    end
-                    break
-                end
-            end
-            if not already_in_cwd then
-                table.insert(copy_files, fs_t)
-            end
+        if filename ~= "." or filename ~= ".." then
+            table.insert(files, filename)
         end
     end
-    marker.marked_files = {}
-    for _, fs_t in ipairs(copy_files) do
-        fs.do_copy(fs_t.filepath, fs.join_paths(vim.g.current_dired_path, fs_t.filename))
+    for _, filename in ipairs(files) do
+        local dir_files = ls.fs_entry.get_directory(dir)
+        local file = ls.get_file_by_filename(dir_files, filename)
+        display.cursor_pos = vim.api.nvim_win_get_cursor(0)
+        -- print(filename, file)
+        clipboard.add_file(file, action)
     end
-    display.goto_filename = ""
+    display.goto_filename = files[1]
     display.render(vim.g.current_dired_path)
+    -- vim.notify(string.format("%d files marked.", #files))
+end
+
+-- function M.move_file()
+--     local dir = nil
+--     dir = vim.g.current_dired_path
+--     local filename = display.get_filename_from_listing(vim.api.nvim_get_current_line())
+--     if filename == nil then
+--         vim.api.nvim_err_writeln("Dired: Invalid operation make sure the cursor is placed on a file/directory.")
+--         return
+--     end
+--     local dir_files = ls.fs_entry.get_directory(dir)
+--     local file = ls.get_file_by_filename(dir_files, filename)
+--     display.cursor_pos = vim.api.nvim_win_get_cursor(0)
+--     display.goto_filename = filename
+--     clipboard.add_file(file, "move")
+--     display.render(vim.g.current_dired_path)
+--     -- vim.notify(string.format("\"%s\" marked.", file.filename))
+-- end
+--
+-- function M.move_file_range()
+--     local dir = nil
+--     dir = vim.g.current_dired_path
+--     local lines = utils.get_visual_selection()
+--     local files = {}
+--     for _, line in ipairs(lines) do
+--         local filename = display.get_filename_from_listing(line)
+--         if filename == nil then
+--             vim.api.nvim_err_writeln(
+--                 "Dired: Invalid operation make sure the selected/marked are of type file/directory."
+--             )
+--             return
+--         end
+--         if filename ~= "." or filename ~= ".." then
+--             table.insert(files, filename)
+--         end
+--     end
+--     for _, filename in ipairs(files) do
+--         local dir_files = ls.fs_entry.get_directory(dir)
+--         local file = ls.get_file_by_filename(dir_files, filename)
+--         display.cursor_pos = vim.api.nvim_win_get_cursor(0)
+--         -- print(filename, file)
+--         clipboard.add_file(file, "move")
+--     end
+--     display.goto_filename = files[1]
+--     display.render(vim.g.current_dired_path)
+--     -- vim.notify(string.format("%d files marked.", #files))
+-- end
+
+function M.paste_file()
+    display.cursor_pos = vim.api.nvim_win_get_cursor(0)
+    clipboard.do_action()
+    display.render(vim.g.current_dired_path)
+    -- vim.notify(string.format("\"%s\" marked.", file.filename))
 end
 
 return M
