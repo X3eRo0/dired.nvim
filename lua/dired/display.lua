@@ -47,6 +47,18 @@ function M.get_directory_listing(directory)
     local dir_size = dir_files.size
     local dir_size_str = utils.get_short_size(dir_size)
     local info1, info2 = nil, nil
+
+    vim.g.dired_file_count = 0
+    vim.g.dired_dir_count = 0
+
+    for i, e in ipairs(dir_files) do
+        if e.filetype == "directory" then
+            vim.g.dired_dir_count = vim.g.dired_dir_count + 1
+        else
+            vim.g.dired_file_count = vim.g.dired_file_count + 1
+        end
+    end
+
     if vim.g.dired_show_colors then
         info1 = { nui_text(string.format("%s:", fs.get_simplified_path(directory))) }
         info2 = { nui_text(string.format("total used in directory %s:", dir_size_str)) }
