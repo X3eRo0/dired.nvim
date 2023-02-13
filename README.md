@@ -53,10 +53,14 @@ Inside a directory buffer, there are the following keybindings:
 * `<CR>`: Open the file or directory at the cursor.
 * `d`   : Create new directories and files.
 * `M`   : Mark directories and files (both in normal and visual mode).
-* `C`   : Paste marked files in current working directory.
+* `C`   : Copy files.
+* `X`   : Move files.
+* `P`   : Paste files in current directory.
 * `D`   : Delete directories and files (both in normal and visual mode).
 * `R`   : Rename directories and files.
 * `MD`  : Delete marked files.
+* `MC`  : Copy marked files.
+* `MX`  : Move marked files.
 * `-`   : Open parent directory.
 * `.`   : Toggle show_hidden.
 * `,`   : Change sort_order.

@@ -318,8 +318,7 @@ end
 
 
 function M.clip_file_range(action)
-    local dir = nil
-    dir = vim.g.current_dired_path
+    local dir = vim.g.current_dired_path
     local lines = utils.get_visual_selection()
     local files = {}
     for _, line in ipairs(lines) do
@@ -337,60 +336,26 @@ function M.clip_file_range(action)
     for _, filename in ipairs(files) do
         local dir_files = ls.fs_entry.get_directory(dir)
         local file = ls.get_file_by_filename(dir_files, filename)
-        display.cursor_pos = vim.api.nvim_win_get_cursor(0)
         -- print(filename, file)
         clipboard.add_file(file, action)
     end
+    display.cursor_pos = vim.api.nvim_win_get_cursor(0)
     display.goto_filename = files[1]
     display.render(vim.g.current_dired_path)
     -- vim.notify(string.format("%d files marked.", #files))
 end
 
--- function M.move_file()
---     local dir = nil
---     dir = vim.g.current_dired_path
---     local filename = display.get_filename_from_listing(vim.api.nvim_get_current_line())
---     if filename == nil then
---         vim.api.nvim_err_writeln("Dired: Invalid operation make sure the cursor is placed on a file/directory.")
---         return
---     end
---     local dir_files = ls.fs_entry.get_directory(dir)
---     local file = ls.get_file_by_filename(dir_files, filename)
---     display.cursor_pos = vim.api.nvim_win_get_cursor(0)
---     display.goto_filename = filename
---     clipboard.add_file(file, "move")
---     display.render(vim.g.current_dired_path)
---     -- vim.notify(string.format("\"%s\" marked.", file.filename))
--- end
---
--- function M.move_file_range()
---     local dir = nil
---     dir = vim.g.current_dired_path
---     local lines = utils.get_visual_selection()
---     local files = {}
---     for _, line in ipairs(lines) do
---         local filename = display.get_filename_from_listing(line)
---         if filename == nil then
---             vim.api.nvim_err_writeln(
---                 "Dired: Invalid operation make sure the selected/marked are of type file/directory."
---             )
---             return
---         end
---         if filename ~= "." or filename ~= ".." then
---             table.insert(files, filename)
---         end
---     end
---     for _, filename in ipairs(files) do
---         local dir_files = ls.fs_entry.get_directory(dir)
---         local file = ls.get_file_by_filename(dir_files, filename)
---         display.cursor_pos = vim.api.nvim_win_get_cursor(0)
---         -- print(filename, file)
---         clipboard.add_file(file, "move")
---     end
---     display.goto_filename = files[1]
---     display.render(vim.g.current_dired_path)
---     -- vim.notify(string.format("%d files marked.", #files))
--- end
+-- copy/move marked files and update marked list
+function M.clip_marked(action)
+    local files = marker.marked_files
+    for _, file in ipairs(files) do
+        clipboard.add_file(file, action)
+    end
+    marker.marked_files = {}
+    display.goto_filename = files[1]
+    display.render(vim.g.current_dired_path)
+    -- vim.notify(string.format("%d files marked.", #files))
+end
 
 function M.paste_file()
     display.cursor_pos = vim.api.nvim_win_get_cursor(0)

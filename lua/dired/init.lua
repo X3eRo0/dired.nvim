@@ -18,6 +18,7 @@ M.delete = dired.delete_file
 M.delete_range = dired.delete_file_range
 M.clip = dired.clip_file
 M.clip_range = dired.clip_file_range
+M.clip_marked = dired.clip_marked
 M.paste = dired.paste_file
 M.mark = dired.mark_file
 M.mark_range = dired.mark_file_range
@@ -83,8 +84,10 @@ function M.setup(opts)
     vim.cmd([[command! DiredGoUp lua require'dired'.goup()]])
     vim.cmd([[command! DiredCopy lua require'dired'.clip("copy")]])
     vim.cmd([[command! DiredCopyRange lua require'dired'.clip_range("copy")]])
+    vim.cmd([[command! DiredCopyMarked lua require'dired'.clip_marked("copy")]])
     vim.cmd([[command! DiredMove lua require'dired'.clip("move")]])
     vim.cmd([[command! DiredMoveRange lua require'dired'.clip_range("move")]])
+    vim.cmd([[command! DiredMoveMarked lua require'dired'.clip_marked("move")]])
     vim.cmd([[command! DiredPaste lua require'dired'.paste()]])
     vim.cmd([[command! DiredEnter lua require'dired'.enter()]])
     vim.cmd([[command! DiredCreate lua require'dired'.create()]])
@@ -104,8 +107,10 @@ function M.setup(opts)
     map("", "<Plug>(dired_delete_range)", ":<C-u>DiredDeleteRange<cr>", opt)
     map("", "<Plug>(dired_delete_marked)", ":DiredDeleteMarked<cr>", opt)
     map("", "<Plug>(dired_copy)", ":DiredCopy<cr>", opt)
+    map("", "<Plug>(dired_copy_marked)", ":DiredCopyMarked<cr>", opt)
     map("", "<Plug>(dired_copy_range)", ":<C-u>DiredCopyRange<cr>", opt)
     map("", "<Plug>(dired_move)", ":DiredMove<cr>", opt)
+    map("", "<Plug>(dired_move_marked)", ":DiredMoveMarked<cr>", opt)
     map("", "<Plug>(dired_move_range)", ":<C-u>DiredMoveRange<cr>", opt)
     map("", "<Plug>(dired_paste)", ":DiredPaste<cr>", opt)
     map("", "<Plug>(dired_mark)", ":DiredMark<cr>", opt)
@@ -136,8 +141,10 @@ function M.setup(opts)
             map(0, "v", "D", "<Plug>(dired_delete_range)", opt)
             map(0, "n", "C", "<Plug>(dired_copy)", opt)
             map(0, "v", "C", "<Plug>(dired_copy_range)", opt)
+            map(0, "n", "MC", "<Plug>(dired_copy_marked)", opt)
             map(0, "n", "X", "<Plug>(dired_move)", opt)
             map(0, "v", "X", "<Plug>(dired_move_range)", opt)
+            map(0, "n", "MX", "<Plug>(dired_move_marked)", opt)
             map(0, "n", "P", "<Plug>(dired_paste)", opt)
             map(0, "n", "M", "<Plug>(dired_mark)", opt)
             map(0, "v", "M", "<Plug>(dired_mark_range)", opt)
