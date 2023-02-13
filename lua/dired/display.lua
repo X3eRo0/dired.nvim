@@ -20,9 +20,11 @@ function M.clear()
 end
 
 function M.render(path)
+    vim.bo.modifiable = true
     M.clear()
     M.display_dired_listing(path)
     M.flush_buffer()
+    vim.bo.modifiable = false
 end
 
 function M.flush_buffer()
@@ -36,8 +38,8 @@ function M.flush_buffer()
         vim.api.nvim_buf_set_lines(0, 0, -1, true, M.buffer)
     end
     vim.bo.undolevels = undolevels
-    vim.bo.modified = false
     vim.api.nvim_win_set_cursor(0, M.cursor_pos)
+    vim.bo.modified = false
     M.buffer = {}
 end
 
