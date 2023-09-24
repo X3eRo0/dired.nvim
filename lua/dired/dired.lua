@@ -95,6 +95,16 @@ function M.enter_dir()
     -- with that file
 end
 
+-- quit already opened Dired buffer
+function M.quit_buf()
+  if vim.bo.filetype ~= "dired" then
+      return
+  end
+
+  history.pop_path()
+  vim.cmd("bp")
+end
+
 function M.go_back()
     local current_path = vim.g.current_dired_path
     display.goto_filename = fs.get_filename(current_path)
