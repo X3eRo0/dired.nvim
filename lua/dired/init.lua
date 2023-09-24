@@ -120,6 +120,7 @@ function M.setup(opts)
     map("", "<Plug>(dired_toggle_hidden)", ":DiredToggleHidden<cr>", opt)
     map("", "<Plug>(dired_toggle_sort_order)", ":DiredToggleSortOrder<cr>", opt)
     map("", "<Plug>(dired_toggle_colors)", ":DiredToggleColors<cr>", opt)
+    map("", "<Plug>(dired_quit)", ":DiredQuit<cr>", opt)
 
     if vim.fn.mapcheck("-", "n") == "" and not vim.fn.hasmapto("<Plug>(dired_back)", "n") then
         map("n", "-", "<Plug>(dired_back)", { silent = true })
@@ -153,6 +154,7 @@ function M.setup(opts)
             map(0, "n", ".", "<Plug>(dired_toggle_hidden)", opt)
             map(0, "n", ",", "<Plug>(dired_toggle_sort_order)", opt)
             map(0, "n", "c", "<Plug>(dired_toggle_colors)", opt)
+            map(0, "n", "q", "<Plug>(dired_quit)", opt)
         end,
     })
 
