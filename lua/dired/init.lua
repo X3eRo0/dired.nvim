@@ -8,6 +8,7 @@ require("dired.highlight").setup()
 local M = {}
 
 M.open = dired.open_dir
+M.quit = dired.quit_buf
 M.enter = dired.enter_dir
 M.goback = dired.go_back
 M.goup = dired.go_up
