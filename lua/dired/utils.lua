@@ -103,7 +103,8 @@ end
 function M.getgroupname(gid)
     -- using GNU id to get groupname.
 
-    if vim.loop.os_uname().sysname == "Windows_NT" then
+    local sysname = vim.loop.os_uname().sysname
+    if sysname == "Windows_NT" then
         return vim.loop.os_gethostname()
     end
 
@@ -111,10 +112,18 @@ function M.getgroupname(gid)
         return M.gid_cache[gid]
     end
 
-    local groupname = vim.fn.system(string.format("id -ng %d", gid))
+    local groupname = "<NULL>"
+
+    if sysname == "Darwin" then
+        groupname = vim.fn.system(string.format("dscl . -list /Groups PrimaryGroupID | awk '$2 == %d {print $1}'", gid))
+    else
+        groupname = vim.fn.system(string.format("id -ng %d", gid))
+    end
+
     if not groupname then
         return nil
     end
+
     groupname = groupname:gsub("[\n\r]", "")
     if string.find(groupname, "no such user") then
         groupname = "<NULL>"
