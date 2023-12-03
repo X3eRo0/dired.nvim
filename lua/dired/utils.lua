@@ -75,7 +75,7 @@ function M.find(table, elem)
 end
 
 function M.getpwid(uid)
-    -- using GNU id to get username because libuv
+    -- using GNU id to get username/group because libuv
     -- does not have a function to return password
     -- database by user id. Only os_get_passwd() is
     -- available.
@@ -101,7 +101,7 @@ function M.getpwid(uid)
 end
 
 function M.getgroupname(gid)
-    -- using GNU id to get groupname.
+    -- using getent to get groupname.
 
     local sysname = vim.loop.os_uname().sysname
     if sysname == "Windows_NT" then
@@ -117,16 +117,17 @@ function M.getgroupname(gid)
     if sysname == "Darwin" then
         groupname = vim.fn.system(string.format("dscl . -list /Groups PrimaryGroupID | awk '$2 == %d {print $1}'", gid))
     else
-        groupname = vim.fn.system(string.format("id -ng %d", gid))
+        groupname =
+            vim.fn.system(string.format("cat /etc/group | grep :%d:| head -n 1 | awk -F ':' '{ print $1}'", gid))
     end
 
     if not groupname then
-        return nil
+        return "???"
     end
 
     groupname = groupname:gsub("[\n\r]", "")
     if string.find(groupname, "no such user") then
-        groupname = "<NULL>"
+        groupname = "???"
     end
 
     M.gid_cache[gid] = groupname
