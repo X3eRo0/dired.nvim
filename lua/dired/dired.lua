@@ -25,7 +25,7 @@ function M.init_dired()
     -- set buffer name to path
     vim.api.nvim_buf_set_name(0, path) -- 0 is current buffer
 
-    vim.bo.filetype = "Dired"
+    vim.bo.filetype = "dired"
     vim.bo.buftype = "acwrite"
     vim.bo.bufhidden = "wipe"
     vim.bo.modifiable = true
