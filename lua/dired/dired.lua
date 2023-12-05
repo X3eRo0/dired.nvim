@@ -25,7 +25,7 @@ function M.init_dired()
     -- set buffer name to path
     vim.api.nvim_buf_set_name(0, path) -- 0 is current buffer
 
-    vim.bo.filetype = "dired"
+    vim.bo.filetype = "Dired"
     vim.bo.buftype = "acwrite"
     vim.bo.bufhidden = "wipe"
     vim.bo.modifiable = true
@@ -97,12 +97,12 @@ end
 
 -- quit already opened Dired buffer
 function M.quit_buf()
-  if vim.bo.filetype ~= "dired" then
-      return
-  end
+    if vim.bo.filetype ~= "dired" then
+        return
+    end
 
-  history.pop_path()
-  vim.cmd("bp")
+    history.pop_path()
+    vim.cmd("bp")
 end
 
 function M.go_back()
@@ -325,7 +325,6 @@ function M.clip_file(action)
     display.render(vim.g.current_dired_path)
     -- vim.notify(string.format("\"%s\" marked.", file.filename))
 end
-
 
 function M.clip_file_range(action)
     local dir = vim.g.current_dired_path
