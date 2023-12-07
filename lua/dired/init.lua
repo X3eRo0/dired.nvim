@@ -3,8 +3,6 @@
 local config = require("dired.config")
 local dired = require("dired.dired")
 
-require("dired.highlight").setup()
-
 local M = {}
 
 M.open = dired.open_dir
@@ -32,6 +30,7 @@ M.toggle_hide_details = dired.toggle_hide_details
 function M.setup(opts)
     -- apply user config
     local errs = config.update(opts)
+    require("dired.highlight").setup()
     if #errs == 1 then
         vim.api.nvim_err_writeln("dired.setup: " .. errs[1])
     elseif #errs > 1 then
@@ -145,34 +144,28 @@ function M.setup(opts)
     vim.api.nvim_create_autocmd("FileType", {
         pattern = "dired",
         callback = function()
-            map(0, "n", config.get("keybinds").dired_enter or "<cr>", "<Plug>(dired_enter)", opt)
-            map(0, "n", config.get("keybinds").dired_back or "-", "<Plug>(dired_back)", opt)
-            map(0, "n", config.get("keybinds").dired_up or "_", "<Plug>(dired_up)", opt)
-            map(0, "n", config.get("keybinds").dired_rename or "R", "<Plug>(dired_rename)", opt)
-            map(0, "n", config.get("keybinds").dired_create or "d", "<Plug>(dired_create)", opt)
-            map(0, "n", config.get("keybinds").dired_delete or "D", "<Plug>(dired_delete)", opt)
-            map(0, "v", config.get("keybinds").dired_delete_range or "D", "<Plug>(dired_delete_range)", opt)
-            map(0, "n", config.get("keybinds").dired_copy or "C", "<Plug>(dired_copy)", opt)
-            map(0, "v", config.get("keybinds").dired_copy_range or "C", "<Plug>(dired_copy_range)", opt)
-            map(0, "n", config.get("keybinds").dired_copy_marked or "MC", "<Plug>(dired_copy_marked)", opt)
-            map(0, "n", config.get("keybinds").dired_move or "X", "<Plug>(dired_move)", opt)
-            map(0, "v", config.get("keybinds").dired_move_range or "X", "<Plug>(dired_move_range)", opt)
-            map(0, "n", config.get("keybinds").dired_move_marked or "MX", "<Plug>(dired_move_marked)", opt)
-            map(0, "n", config.get("keybinds").dired_paste or "P", "<Plug>(dired_paste)", opt)
-            map(0, "n", config.get("keybinds").dired_mark or "M", "<Plug>(dired_mark)", opt)
-            map(0, "v", config.get("keybinds").dired_mark_range or "M", "<Plug>(dired_mark_range)", opt)
-            map(0, "n", config.get("keybinds").dired_delete_marked or "MD", "<Plug>(dired_delete_marked)", opt)
-            map(0, "n", config.get("keybinds").dired_toggle_hidden or ".", "<Plug>(dired_toggle_hidden)", opt)
-            map(0, "n", config.get("keybinds").dired_toggle_sort_order or ",", "<Plug>(dired_toggle_sort_order)", opt)
-            map(0, "n", config.get("keybinds").dired_toggle_colors or "c", "<Plug>(dired_toggle_colors)", opt)
-            map(
-                0,
-                "n",
-                config.get("keybinds").dired_toggle_hide_details or "(",
-                "<Plug>(dired_toggle_hide_details)",
-                opt
-            )
-            map(0, "n", config.get("keybinds").dired_quit or "q", "<Plug>(dired_quit)", opt)
+            map(0, "n", config.get("keybinds").dired_enter, "<Plug>(dired_enter)", opt)
+            map(0, "n", config.get("keybinds").dired_back, "<Plug>(dired_back)", opt)
+            map(0, "n", config.get("keybinds").dired_up, "<Plug>(dired_up)", opt)
+            map(0, "n", config.get("keybinds").dired_rename, "<Plug>(dired_rename)", opt)
+            map(0, "n", config.get("keybinds").dired_create, "<Plug>(dired_create)", opt)
+            map(0, "n", config.get("keybinds").dired_delete, "<Plug>(dired_delete)", opt)
+            map(0, "v", config.get("keybinds").dired_delete_range, "<Plug>(dired_delete_range)", opt)
+            map(0, "n", config.get("keybinds").dired_copy, "<Plug>(dired_copy)", opt)
+            map(0, "v", config.get("keybinds").dired_copy_range, "<Plug>(dired_copy_range)", opt)
+            map(0, "n", config.get("keybinds").dired_copy_marked, "<Plug>(dired_copy_marked)", opt)
+            map(0, "n", config.get("keybinds").dired_move, "<Plug>(dired_move)", opt)
+            map(0, "v", config.get("keybinds").dired_move_range, "<Plug>(dired_move_range)", opt)
+            map(0, "n", config.get("keybinds").dired_move_marked, "<Plug>(dired_move_marked)", opt)
+            map(0, "n", config.get("keybinds").dired_paste, "<Plug>(dired_paste)", opt)
+            map(0, "n", config.get("keybinds").dired_mark, "<Plug>(dired_mark)", opt)
+            map(0, "v", config.get("keybinds").dired_mark_range, "<Plug>(dired_mark_range)", opt)
+            map(0, "n", config.get("keybinds").dired_delete_marked, "<Plug>(dired_delete_marked)", opt)
+            map(0, "n", config.get("keybinds").dired_toggle_hidden, "<Plug>(dired_toggle_hidden)", opt)
+            map(0, "n", config.get("keybinds").dired_toggle_sort_order, "<Plug>(dired_toggle_sort_order)", opt)
+            map(0, "n", config.get("keybinds").dired_toggle_colors, "<Plug>(dired_toggle_colors)", opt)
+            map(0, "n", config.get("keybinds").dired_toggle_hide_details, "<Plug>(dired_toggle_hide_details)", opt)
+            map(0, "n", config.get("keybinds").dired_quit, "<Plug>(dired_quit)", opt)
         end,
     })
 

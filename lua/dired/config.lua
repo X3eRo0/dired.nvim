@@ -1,6 +1,7 @@
 local M = {}
 
 local sort = require("dired.sort")
+local util = require("dired.utils")
 
 local CONFIG_SPEC = {
     show_colors = {
@@ -95,8 +96,40 @@ local CONFIG_SPEC = {
             dired_toggle_hide_details = "(",
             dired_quit = "q",
         },
-        check = function(dict)
+        check = function()
             return {}
+        end,
+    },
+    colors = {
+        default = {
+            DiredDimText = { hg = {}, bg = "NONE", fg = "505050", gui = "NONE" },
+            DiredDirectoryName = { hg = {}, bg = "NONE", fg = "9370DB", gui = "NONE" },
+            DiredDotfile = { hg = {}, bg = "NONE", fg = "626262" },
+            DiredFadeText1 = { hg = {}, bg = "NONE", fg = "626262", gui = "NONE" },
+            DiredFadeText2 = { hg = {}, bg = "NONE", fg = "444444", gui = "NONE" },
+            DiredSize = { hg = {}, bg = "NONE", fg = "306844", gui = "NONE" },
+            DiredUsername = { hg = {}, bg = "NONE", fg = "87CEFA", gui = "bold" },
+            DiredMonth = { hg = {}, bg = "NONE", fg = "696969", gui = "bold" },
+            DiredDay = { hg = {}, bg = "NONE", fg = "778899", gui = "bold" },
+            DiredFileName = { hg = {}, bg = "NONE", fg = "NONE", gui = "NONE" },
+            DiredFileSuid = { hg = {}, bg = "ff6666", fg = "000000", gui = "bold" },
+            DiredNormal = { hg = { "Normal" }, bg = "NONE", fg = "NONE", gui = "NONE" },
+            DiredNormalBold = { hg = {}, bg = "NONE", fg = "ffffff", gui = "bold" },
+            DiredSymbolicLink = { hg = {}, bg = "NONE", fg = "33ccff", gui = "bold" },
+            DiredBrokenLink = { hg = {}, bg = "2e2e1f", fg = "ff1a1a", gui = "bold" },
+            DiredSymbolicLinkTarget = { hg = {}, bg = "5bd75b", fg = "000000", gui = "bold" },
+            DiredBrokenLinkTarget = { hg = {}, bg = "2e2e1f", fg = "ff1a1a", gui = "bold" },
+            DiredFileExecutable = { hg = {}, bg = "NONE", fg = "5bd75b", gui = "bold" },
+            DiredMarkedFile = { hg = {}, bg = "NONE", fg = "a8b103", gui = "bold" },
+            DiredCopyFile = { hg = {}, bg = "NONE", fg = "ff8533", gui = "bold" },
+            DiredMoveFile = { hg = {}, bg = "NONE", fg = "ff3399", gui = "bold" },
+        },
+        check = function(cfg)
+            for k, v in pairs(cfg) do
+                if v["hg"] == nil or v["bg"] == nil or v["fg"] == nil or v["gui"] == nil then
+                    return "Must contain a hg, bg, fg and gui element for each highlight group"
+                end
+            end
         end,
     },
 }
@@ -106,15 +139,49 @@ local user_config = {}
 function M.update(opts)
     local errs = {}
     for opt_name, spec in pairs(CONFIG_SPEC) do
-        local val = opts[opt_name]
-        if val == nil then
+        local usr_val = opts[opt_name]
+        if usr_val == nil then
             user_config[opt_name] = nil
         else
-            local ret = spec.check(val)
-            if type(ret) == "string" then
-                table.insert(errs, string.format("`%s` %s", opt_name, ret))
+            -- create keybind config of user + defaults
+            if opt_name == "keybinds" then
+                user_config.keybinds = util.shallowcopy(CONFIG_SPEC.keybinds.default)
+                local ret = spec.check(usr_val)
+                if type(ret) == "string" then
+                    table.insert(errs, string.format("`%s` %s", opt_name, ret))
+                else
+                    for key, val in pairs(usr_val) do
+                        user_config.keybinds[key] = val
+                    end
+                end
+
+            -- create colors config of user + defaults
+            elseif opt_name == "colors" then
+                user_config.colors = util.shallowcopy(CONFIG_SPEC.colors.default)
+                local ret = spec.check(usr_val)
+                if type(ret) == "string" then
+                    table.insert(errs, string.format("`%s` %s", opt_name, ret))
+                else
+                    for key, val in pairs(usr_val) do
+                        user_config.colors[key] = val
+                    end
+                end
+            elseif opt_name == "sort_order" then
+                local ret = spec.check(usr_val)
+                if type(ret) == "string" then
+                    table.insert(errs, string.format("`%s` %s", opt_name, ret))
+                else
+                    user_config[opt_name] = ret
+                end
+
+            -- handle rest of the config that are not tables
             else
-                user_config[opt_name] = val
+                local ret = spec.check(usr_val)
+                if type(ret) == "string" then
+                    table.insert(errs, string.format("`%s` %s", opt_name, ret))
+                else
+                    user_config[opt_name] = usr_val
+                end
             end
         end
     end
@@ -129,6 +196,7 @@ function M.update(opts)
     if #unrecognised_opts > 0 then
         table.insert(errs, table.concat(unrecognised_opts, ", ") .. "not recognised")
     end
+
     return errs
 end
 
