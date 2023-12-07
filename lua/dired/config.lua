@@ -102,32 +102,32 @@ local CONFIG_SPEC = {
     },
     colors = {
         default = {
-            DiredDimText = { hg = {}, bg = "NONE", fg = "505050", gui = "NONE" },
-            DiredDirectoryName = { hg = {}, bg = "NONE", fg = "9370DB", gui = "NONE" },
-            DiredDotfile = { hg = {}, bg = "NONE", fg = "626262" },
-            DiredFadeText1 = { hg = {}, bg = "NONE", fg = "626262", gui = "NONE" },
-            DiredFadeText2 = { hg = {}, bg = "NONE", fg = "444444", gui = "NONE" },
-            DiredSize = { hg = {}, bg = "NONE", fg = "306844", gui = "NONE" },
-            DiredUsername = { hg = {}, bg = "NONE", fg = "87CEFA", gui = "bold" },
-            DiredMonth = { hg = {}, bg = "NONE", fg = "696969", gui = "bold" },
-            DiredDay = { hg = {}, bg = "NONE", fg = "778899", gui = "bold" },
-            DiredFileName = { hg = {}, bg = "NONE", fg = "NONE", gui = "NONE" },
-            DiredFileSuid = { hg = {}, bg = "ff6666", fg = "000000", gui = "bold" },
-            DiredNormal = { hg = { "Normal" }, bg = "NONE", fg = "NONE", gui = "NONE" },
-            DiredNormalBold = { hg = {}, bg = "NONE", fg = "ffffff", gui = "bold" },
-            DiredSymbolicLink = { hg = {}, bg = "NONE", fg = "33ccff", gui = "bold" },
-            DiredBrokenLink = { hg = {}, bg = "2e2e1f", fg = "ff1a1a", gui = "bold" },
-            DiredSymbolicLinkTarget = { hg = {}, bg = "5bd75b", fg = "000000", gui = "bold" },
-            DiredBrokenLinkTarget = { hg = {}, bg = "2e2e1f", fg = "ff1a1a", gui = "bold" },
-            DiredFileExecutable = { hg = {}, bg = "NONE", fg = "5bd75b", gui = "bold" },
-            DiredMarkedFile = { hg = {}, bg = "NONE", fg = "a8b103", gui = "bold" },
-            DiredCopyFile = { hg = {}, bg = "NONE", fg = "ff8533", gui = "bold" },
-            DiredMoveFile = { hg = {}, bg = "NONE", fg = "ff3399", gui = "bold" },
+            DiredDimText = { link = {}, bg = "NONE", fg = "505050", gui = "NONE" },
+            DiredDirectoryName = { link = {}, bg = "NONE", fg = "9370DB", gui = "NONE" },
+            DiredDotfile = { link = {}, bg = "NONE", fg = "626262" },
+            DiredFadeText1 = { link = {}, bg = "NONE", fg = "626262", gui = "NONE" },
+            DiredFadeText2 = { link = {}, bg = "NONE", fg = "444444", gui = "NONE" },
+            DiredSize = { link = {}, bg = "NONE", fg = "306844", gui = "NONE" },
+            DiredUsername = { link = {}, bg = "NONE", fg = "87CEFA", gui = "bold" },
+            DiredMonth = { link = {}, bg = "NONE", fg = "696969", gui = "bold" },
+            DiredDay = { link = {}, bg = "NONE", fg = "778899", gui = "bold" },
+            DiredFileName = { link = {}, bg = "NONE", fg = "NONE", gui = "NONE" },
+            DiredFileSuid = { link = {}, bg = "ff6666", fg = "000000", gui = "bold" },
+            DiredNormal = { link = { "Normal" }, bg = "NONE", fg = "NONE", gui = "NONE" },
+            DiredNormalBold = { link = {}, bg = "NONE", fg = "ffffff", gui = "bold" },
+            DiredSymbolicLink = { link = {}, bg = "NONE", fg = "33ccff", gui = "bold" },
+            DiredBrokenLink = { link = {}, bg = "2e2e1f", fg = "ff1a1a", gui = "bold" },
+            DiredSymbolicLinkTarget = { link = {}, bg = "5bd75b", fg = "000000", gui = "bold" },
+            DiredBrokenLinkTarget = { link = {}, bg = "2e2e1f", fg = "ff1a1a", gui = "bold" },
+            DiredFileExecutable = { link = {}, bg = "NONE", fg = "5bd75b", gui = "bold" },
+            DiredMarkedFile = { link = {}, bg = "NONE", fg = "a8b103", gui = "bold" },
+            DiredCopyFile = { link = {}, bg = "NONE", fg = "ff8533", gui = "bold" },
+            DiredMoveFile = { link = {}, bg = "NONE", fg = "ff3399", gui = "bold" },
         },
         check = function(cfg)
             for k, v in pairs(cfg) do
-                if v["hg"] == nil or v["bg"] == nil or v["fg"] == nil or v["gui"] == nil then
-                    return "Must contain a hg, bg, fg and gui element for each highlight group"
+                if v["link"] == nil or v["bg"] == nil or v["fg"] == nil or v["gui"] == nil then
+                    return "Must contain a link, bg, fg and gui element for each highlight group"
                 end
             end
         end,

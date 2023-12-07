@@ -178,130 +178,130 @@ M.setup = function()
     if clr ~= nil then
         create_highlight_group(
             M.DIM_TEXT,
-            clr.DiredDimText.hg,
+            clr.DiredDimText.link,
             clr.DiredDimText.bg,
             clr.DiredDimText.fg,
             clr.DiredDimText.gui
         )
         create_highlight_group(
             M.DIRECTORY_NAME,
-            clr.DiredDirectoryName.hg,
+            clr.DiredDirectoryName.link,
             clr.DiredDirectoryName.bg,
             clr.DiredDirectoryName.fg,
             clr.DiredDirectoryName.gui
         )
         create_highlight_group(
             M.DOTFILE,
-            clr.DiredDotfile.hg,
+            clr.DiredDotfile.link,
             clr.DiredDotfile.bg,
             clr.DiredDotfile.fg,
             clr.DiredDotfile.gui
         )
         create_highlight_group(
             M.FADE_TEXT_1,
-            clr.DiredFadeText1.hg,
+            clr.DiredFadeText1.link,
             clr.DiredFadeText1.bg,
             clr.DiredFadeText1.fg,
             clr.DiredFadeText1.gui
         )
         create_highlight_group(
             M.FADE_TEXT_2,
-            clr.DiredFadeText2.hg,
+            clr.DiredFadeText2.link,
             clr.DiredFadeText2.bg,
             clr.DiredFadeText2.fg,
             clr.DiredFadeText2.gui
         )
 
-        create_highlight_group(M.SIZE, clr.DiredSize.hg, clr.DiredSize.bg, clr.DiredSize.fg, clr.DiredSize.gui)
+        create_highlight_group(M.SIZE, clr.DiredSize.link, clr.DiredSize.bg, clr.DiredSize.fg, clr.DiredSize.gui)
         create_highlight_group(
             M.USERNAME,
-            clr.DiredUsername.hg,
+            clr.DiredUsername.link,
             clr.DiredUsername.bg,
             clr.DiredUsername.fg,
             clr.DiredUsername.gui
         )
-        create_highlight_group(M.MONTH, clr.DiredMonth.hg, clr.DiredMonth.bg, clr.DiredMonth.fg, clr.DiredMonth.gui)
-        create_highlight_group(M.DAY, clr.DiredDay.hg, clr.DiredDay.bg, clr.DiredDay.fg, clr.DiredDay.gui)
+        create_highlight_group(M.MONTH, clr.DiredMonth.link, clr.DiredMonth.bg, clr.DiredMonth.fg, clr.DiredMonth.gui)
+        create_highlight_group(M.DAY, clr.DiredDay.link, clr.DiredDay.bg, clr.DiredDay.fg, clr.DiredDay.gui)
         create_highlight_group(
             M.FILE_NAME,
-            clr.DiredFileName.hg,
+            clr.DiredFileName.link,
             clr.DiredFileName.bg,
             clr.DiredFileName.fg,
             clr.DiredFileName.gui
         )
         create_highlight_group(
             M.FILE_SUID,
-            clr.DiredFileSuid.hg,
+            clr.DiredFileSuid.link,
             clr.DiredFileSuid.bg,
             clr.DiredFileSuid.fg,
             clr.DiredFileSuid.gui
         )
         create_highlight_group(
             M.NORMAL,
-            clr.DiredNormal.hg,
+            clr.DiredNormal.link,
             clr.DiredNormal.bg,
             clr.DiredNormal.fg,
             clr.DiredNormal.gui
         )
         create_highlight_group(
             M.NORMALBOLD,
-            clr.DiredNormalBold.hg,
+            clr.DiredNormalBold.link,
             clr.DiredNormalBold.bg,
             clr.DiredNormalBold.fg,
             clr.DiredNormalBold.gui
         )
         create_highlight_group(
             M.SYMBOLIC_LINK,
-            clr.DiredSymbolicLink.hg,
+            clr.DiredSymbolicLink.link,
             clr.DiredSymbolicLink.bg,
             clr.DiredSymbolicLink.fg,
             clr.DiredSymbolicLink.gui
         )
         create_highlight_group(
             M.SYMBOLIC_LINK_TARGET,
-            clr.DiredBrokenLink.hg,
+            clr.DiredBrokenLink.link,
             clr.DiredBrokenLink.bg,
             clr.DiredBrokenLink.fg,
             clr.DiredBrokenLink.gui
         )
         create_highlight_group(
             M.BROKEN_LINK,
-            clr.DiredSymbolicLinkTarget.hg,
+            clr.DiredSymbolicLinkTarget.link,
             clr.DiredSymbolicLinkTarget.bg,
             clr.DiredSymbolicLinkTarget.fg,
             clr.DiredSymbolicLinkTarget.gui
         )
         create_highlight_group(
             M.BROKEN_LINK_TARGET,
-            clr.DiredBrokenLinkTarget.hg,
+            clr.DiredBrokenLinkTarget.link,
             clr.DiredBrokenLinkTarget.bg,
             clr.DiredBrokenLinkTarget.fg,
             clr.DiredBrokenLinkTarget.gui
         )
         create_highlight_group(
             M.FILE_EXECUTABLE,
-            clr.DiredFileExecutable.hg,
+            clr.DiredFileExecutable.link,
             clr.DiredFileExecutable.bg,
             clr.DiredFileExecutable.fg,
             clr.DiredFileExecutable.gui
         )
         create_highlight_group(
             M.MARKED_FILE,
-            clr.DiredMarkedFile.hg,
+            clr.DiredMarkedFile.link,
             clr.DiredMarkedFile.bg,
             clr.DiredMarkedFile.fg,
             clr.DiredMarkedFile.gui
         )
         create_highlight_group(
             M.COPY_FILE,
-            clr.DiredCopyFile.hg,
+            clr.DiredCopyFile.link,
             clr.DiredCopyFile.bg,
             clr.DiredCopyFile.fg,
             clr.DiredCopyFile.gui
         )
         create_highlight_group(
             M.MOVE_FILE,
-            clr.DiredMoveFile.hg,
+            clr.DiredMoveFile.link,
             clr.DiredMoveFile.bg,
             clr.DiredMoveFile.fg,
             clr.DiredMoveFile.gui
