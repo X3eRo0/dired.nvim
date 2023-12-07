@@ -190,6 +190,7 @@ function fs_entry.format(dir_files, show_dot_dirs, show_hidden, hide_details)
         if show_file == true then
             if hide_details == true then
                 fs_comps = {
+                    fs_t = fs_t,
                     filename = fs_t.filename,
                 }
             else
@@ -253,7 +254,10 @@ function fs_entry.format(dir_files, show_dot_dirs, show_hidden, hide_details)
         + max_widths.monthlen
         + max_widths.daylen
         + max_widths.ftimelen
-        + 8
+
+    if not hide_details then
+        cursor_x = cursor_x + 8
+    end
 
     if not hide_details then
         -- we now have length for formatting

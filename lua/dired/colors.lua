@@ -87,6 +87,12 @@ function M.get_filename_color(component)
 end
 
 function M.get_component_str(component)
+    if vim.g.dired_hide_details then
+        return {
+            component = component,
+            line = string.format("%s", component.filename),
+        }
+    end
     return {
         component = component,
         line = string.format(
@@ -117,18 +123,25 @@ function M.get_colored_component_str(component)
     local ftimecolor = M.get_ftime_color()
     -- primary M.and secondary color in case its a symlink
     local fcolor_p, fcolor_s = M.get_filename_color(component)
-    local text_group = {
-        nt(component.permissions, permcolor),
-        nt(component.nlinks, nlinkcolor),
-        nt(component.owner, ownercolor),
-        nt(component.group, groupcolor),
-        nt(component.size, sizecolor),
-        nt(component.month, monthcolor),
-        nt(component.day, daycolor),
-        nt(component.ftime, ftimecolor),
-        -- nt(component.ficon, ftimecolor),
-        nt(component.filename, fcolor_p),
-    }
+    local text_group = {}
+    if vim.g.dired_hide_details then
+        text_group = {
+            nt(component.filename, fcolor_p),
+        }
+    else
+        text_group = {
+            nt(component.permissions, permcolor),
+            nt(component.nlinks, nlinkcolor),
+            nt(component.owner, ownercolor),
+            nt(component.group, groupcolor),
+            nt(component.size, sizecolor),
+            nt(component.month, monthcolor),
+            nt(component.day, daycolor),
+            nt(component.ftime, ftimecolor),
+            -- nt(component.ficon, ftimecolor),
+            nt(component.filename, fcolor_p),
+        }
+    end
 
     if component.fs_t.filetype == "link" then
         local linktarget = fs.get_symlink(component.fs_t.filepath)

@@ -92,6 +92,7 @@ local CONFIG_SPEC = {
             dired_toggle_hidden = ".",
             dired_toggle_sort_order = ",",
             dired_toggle_colors = "c",
+            dired_toggle_hide_details = "(",
             dired_quit = "q",
         },
         check = function(dict)

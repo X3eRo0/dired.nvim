@@ -27,6 +27,7 @@ M.delete_marked = dired.delete_marked
 M.toggle_hidden_files = dired.toggle_hidden_files
 M.toggle_sort_order = dired.toggle_sort_order
 M.toggle_colors = dired.toggle_colors
+M.toggle_hide_details = dired.toggle_hide_details
 
 function M.setup(opts)
     -- apply user config
@@ -103,6 +104,7 @@ function M.setup(opts)
     vim.cmd([[command! DiredToggleHidden lua require'dired'.toggle_hidden_files()]])
     vim.cmd([[command! DiredToggleSortOrder lua require'dired'.toggle_sort_order()]])
     vim.cmd([[command! DiredToggleColors lua require'dired'.toggle_colors()]])
+    vim.cmd([[command! DiredToggleHideDetails lua require'dired'.toggle_hide_details()]])
     vim.cmd([[command! DiredQuit lua require'dired'.quit()]])
 
     -- setup keybinds
@@ -128,6 +130,7 @@ function M.setup(opts)
     map("", "<Plug>(dired_toggle_hidden)", ":DiredToggleHidden<cr>", opt)
     map("", "<Plug>(dired_toggle_sort_order)", ":DiredToggleSortOrder<cr>", opt)
     map("", "<Plug>(dired_toggle_colors)", ":DiredToggleColors<cr>", opt)
+    map("", "<Plug>(dired_toggle_hide_details)", ":DiredToggleHideDetails<cr>", opt)
     map("", "<Plug>(dired_quit)", ":DiredQuit<cr>", opt)
 
     if vim.fn.mapcheck("-", "n") == "" and not vim.fn.hasmapto("<Plug>(dired_back)", "n") then
@@ -142,27 +145,6 @@ function M.setup(opts)
     vim.api.nvim_create_autocmd("FileType", {
         pattern = "dired",
         callback = function()
-            -- map(0, "n", "<cr>", "<Plug>(dired_enter)", opt)
-            -- map(0, "n", "-", "<Plug>(dired_back)", opt)
-            -- map(0, "n", "_", "<Plug>(dired_up)", opt)
-            -- map(0, "n", "R", "<Plug>(dired_rename)", opt)
-            -- map(0, "n", "d", "<Plug>(dired_create)", opt)
-            -- map(0, "n", "D", "<Plug>(dired_delete)", opt)
-            -- map(0, "v", "D", "<Plug>(dired_delete_range)", opt)
-            -- map(0, "n", "C", "<Plug>(dired_copy)", opt)
-            -- map(0, "v", "C", "<Plug>(dired_copy_range)", opt)
-            -- map(0, "n", "MC", "<Plug>(dired_copy_marked)", opt)
-            -- map(0, "n", "X", "<Plug>(dired_move)", opt)
-            -- map(0, "v", "X", "<Plug>(dired_move_range)", opt)
-            -- map(0, "n", "MX", "<Plug>(dired_move_marked)", opt)
-            -- map(0, "n", "P", "<Plug>(dired_paste)", opt)
-            -- map(0, "n", "M", "<Plug>(dired_mark)", opt)
-            -- map(0, "v", "M", "<Plug>(dired_mark_range)", opt)
-            -- map(0, "n", "MD", "<Plug>(dired_delete_marked)", opt)
-            -- map(0, "n", ".", "<Plug>(dired_toggle_hidden)", opt)
-            -- map(0, "n", ",", "<Plug>(dired_toggle_sort_order)", opt)
-            -- map(0, "n", "c", "<Plug>(dired_toggle_colors)", opt)
-            -- map(0, "n", "q", "<Plug>(dired_quit)", opt)
             map(0, "n", config.get("keybinds").dired_enter or "<cr>", "<Plug>(dired_enter)", opt)
             map(0, "n", config.get("keybinds").dired_back or "-", "<Plug>(dired_back)", opt)
             map(0, "n", config.get("keybinds").dired_up or "_", "<Plug>(dired_up)", opt)
@@ -183,6 +165,13 @@ function M.setup(opts)
             map(0, "n", config.get("keybinds").dired_toggle_hidden or ".", "<Plug>(dired_toggle_hidden)", opt)
             map(0, "n", config.get("keybinds").dired_toggle_sort_order or ",", "<Plug>(dired_toggle_sort_order)", opt)
             map(0, "n", config.get("keybinds").dired_toggle_colors or "c", "<Plug>(dired_toggle_colors)", opt)
+            map(
+                0,
+                "n",
+                config.get("keybinds").dired_toggle_hide_details or "(",
+                "<Plug>(dired_toggle_hide_details)",
+                opt
+            )
             map(0, "n", config.get("keybinds").dired_quit or "q", "<Plug>(dired_quit)", opt)
         end,
     })
