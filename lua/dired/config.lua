@@ -27,6 +27,14 @@ local CONFIG_SPEC = {
             end
         end,
     },
+    hide_details = {
+        default = false,
+        check = function(val)
+            if type(val) ~= "boolean" then
+                return "Must be boolean, instead received " .. type(val)
+            end
+        end,
+    },
     path_separator = {
         default = "/",
         check = function(val)
@@ -88,7 +96,7 @@ local CONFIG_SPEC = {
         },
         check = function(dict)
             return {}
-        end
+        end,
     },
 }
 

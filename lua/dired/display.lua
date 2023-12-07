@@ -69,7 +69,7 @@ function M.get_directory_listing(directory)
         info2 = string.format("total used in directory %s:", dir_size_str)
     end
     local formatted_components, cursor_x =
-        ls.fs_entry.format(dir_files, vim.g.dired_show_dot_dirs, vim.g.dired_show_hidden)
+        ls.fs_entry.format(dir_files, vim.g.dired_show_dot_dirs, vim.g.dired_show_hidden, vim.g.dired_hide_details)
     table.insert(buffer_listing, { component = nil, line = info1 })
     table.insert(buffer_listing, { component = nil, line = info2 })
 

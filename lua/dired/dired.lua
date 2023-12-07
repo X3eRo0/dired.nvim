@@ -124,6 +124,14 @@ function M.toggle_hidden_files()
     M.init_dired()
 end
 
+-- toggle between hide_details mode
+function M.toggle_hide_details()
+    display.cursor_pos = {}
+    vim.g.dired_hide_details = not vim.g.dired_hide_details
+    vim.notify(string.format("dired_hide_details: %s", vim.inspect(vim.g.dired_hide_details)))
+    M.init_dired()
+end
+
 -- change the sort order
 function M.toggle_sort_order()
     vim.g.dired_sort_order = config.get_next_sort_order()

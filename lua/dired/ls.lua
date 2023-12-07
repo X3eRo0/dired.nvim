@@ -146,7 +146,7 @@ function fs_entry.get_directory(directory)
 end
 
 -- function to format each component
-function fs_entry.format(dir_files, show_dot_dirs, show_hidden)
+function fs_entry.format(dir_files, show_dot_dirs, show_hidden, hide_details)
     -- components :
     --  1. permissions
     --  2. # of links
@@ -186,51 +186,58 @@ function fs_entry.format(dir_files, show_dot_dirs, show_hidden)
             show_file = false
         end
 
+        local fs_comps = nil
         if show_file == true then
-            local fs_comps = {
-                fs_t = fs_t,
-                permissions = M.get_permission_str(fs_t.mode),
-                nlinks = string.format("%d", fs_t.nlinks),
-                owner = fs_t.owner,
-                group = fs_t.group,
-                size = utils.get_short_size(fs_t.size),
-                month = utils.get_month(fs_t.stat),
-                day = utils.get_day(fs_t.stat),
-                ftime = utils.get_ftime(fs_t.stat),
-                ficon = utils.get_icon_by_filetype(fs_t.filetype),
-                filename = fs_t.filename,
-            }
+            if hide_details == true then
+                fs_comps = {
+                    filename = fs_t.filename,
+                }
+            else
+                fs_comps = {
+                    fs_t = fs_t,
+                    permissions = M.get_permission_str(fs_t.mode),
+                    nlinks = string.format("%d", fs_t.nlinks),
+                    owner = fs_t.owner,
+                    group = fs_t.group,
+                    size = utils.get_short_size(fs_t.size),
+                    month = utils.get_month(fs_t.stat),
+                    day = utils.get_day(fs_t.stat),
+                    ftime = utils.get_ftime(fs_t.stat),
+                    ficon = utils.get_icon_by_filetype(fs_t.filetype),
+                    filename = fs_t.filename,
+                }
 
-            -- calculate maximum widths for each component
-            -- length of permissions will always be same
-            max_widths.permlen = #fs_comps.permissions
+                -- calculate maximum widths for each component
+                -- length of permissions will always be same
+                max_widths.permlen = #fs_comps.permissions
 
-            if max_widths.linklen < #fs_comps.nlinks then
-                max_widths.linklen = #fs_comps.nlinks
-            end
+                if max_widths.linklen < #fs_comps.nlinks then
+                    max_widths.linklen = #fs_comps.nlinks
+                end
 
-            if max_widths.ownerlen < #fs_comps.owner then
-                max_widths.ownerlen = #fs_comps.owner
-            end
+                if max_widths.ownerlen < #fs_comps.owner then
+                    max_widths.ownerlen = #fs_comps.owner
+                end
 
-            if max_widths.grouplen < #fs_comps.group then
-                max_widths.grouplen = #fs_comps.group
-            end
+                if max_widths.grouplen < #fs_comps.group then
+                    max_widths.grouplen = #fs_comps.group
+                end
 
-            if max_widths.sizelen < #fs_comps.size then
-                max_widths.sizelen = #fs_comps.size
-            end
+                if max_widths.sizelen < #fs_comps.size then
+                    max_widths.sizelen = #fs_comps.size
+                end
 
-            if max_widths.monthlen < #fs_comps.month then
-                max_widths.monthlen = #fs_comps.month
-            end
+                if max_widths.monthlen < #fs_comps.month then
+                    max_widths.monthlen = #fs_comps.month
+                end
 
-            if max_widths.daylen < #fs_comps.day then
-                max_widths.daylen = #fs_comps.day
-            end
+                if max_widths.daylen < #fs_comps.day then
+                    max_widths.daylen = #fs_comps.day
+                end
 
-            if max_widths.ftimelen < #fs_comps.ftime then
-                max_widths.ftimelen = #fs_comps.ftime
+                if max_widths.ftimelen < #fs_comps.ftime then
+                    max_widths.ftimelen = #fs_comps.ftime
+                end
             end
 
             table.insert(comps_by_fs_t, fs_comps)
@@ -248,22 +255,23 @@ function fs_entry.format(dir_files, show_dot_dirs, show_hidden)
         + max_widths.ftimelen
         + 8
 
-    -- we now have length for formatting
-    -- we now format the listing properly
-    for _, comp in ipairs(comps_by_fs_t) do
-        -- format
-        comp.nlinks = string.format("%" .. max_widths.linklen .. "s", comp.nlinks)
-        comp.owner = string.format("%-" .. max_widths.ownerlen .. "s", comp.owner)
-        comp.group = string.format("%-" .. max_widths.grouplen .. "s", comp.group)
-        comp.size = string.format("%" .. max_widths.sizelen .. "s", comp.size)
-        comp.month = string.format("%" .. max_widths.monthlen .. "s", comp.month)
-        comp.day = string.format("%" .. max_widths.daylen .. "s", comp.day)
-        comp.ftime = string.format("%" .. max_widths.ftimelen .. "s", comp.ftime)
+    if not hide_details then
+        -- we now have length for formatting
+        -- we now format the listing properly
+        for _, comp in ipairs(comps_by_fs_t) do
+            -- format
+            comp.nlinks = string.format("%" .. max_widths.linklen .. "s", comp.nlinks)
+            comp.owner = string.format("%-" .. max_widths.ownerlen .. "s", comp.owner)
+            comp.group = string.format("%-" .. max_widths.grouplen .. "s", comp.group)
+            comp.size = string.format("%" .. max_widths.sizelen .. "s", comp.size)
+            comp.month = string.format("%" .. max_widths.monthlen .. "s", comp.month)
+            comp.day = string.format("%" .. max_widths.daylen .. "s", comp.day)
+            comp.ftime = string.format("%" .. max_widths.ftimelen .. "s", comp.ftime)
+        end
     end
 
     return comps_by_fs_t, cursor_x
 end
-
 
 function M.get_file_by_filename(dir_files, filename)
     if string.find(filename, " -> ") then

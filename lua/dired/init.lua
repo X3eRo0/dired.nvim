@@ -59,6 +59,14 @@ function M.setup(opts)
         vim.g.dired_show_hidden = config.get("show_hidden")
     end
 
+    -- global variable for hide_details
+    if config.get("hide_details") == nil then
+        -- default for show-hidden is true
+        vim.g.dired_hide_details = true
+    else
+        vim.g.dired_hide_details = config.get("hide_details")
+    end
+
     if config.get("show_dot_dirs") == nil then
         -- default for show-hidden is true
         vim.g.dired_show_dot_dirs = true
