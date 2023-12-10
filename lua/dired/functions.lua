@@ -8,7 +8,10 @@ local M = {}
 M.path_separator = config.get("path_separator")
 
 function M.rename_file(fs_t)
-    local new_name = vim.fn.input(string.format("Enter New Name (%s): ", fs_t.filename))
+    local new_name = vim.fn.input({
+        prompt = string.format("Enter New Name (%s): ", fs_t.filename),
+        default = fs_t.filename,
+    })
     if new_name == "" then
         return
     end
@@ -16,7 +19,9 @@ function M.rename_file(fs_t)
     local new_path = fs.join_paths(fs_t.parent_dir, new_name)
     local success = vim.loop.fs_rename(old_path, new_path)
     if not success then
-        vim.notify(string.format(' DiredRename: Could not rename "%s" to "%s".', fs_t.filename, new_name))
+        vim.notify(
+            string.format(' DiredRename: Could not rename "%s" to "%s".', fs_t.filename, new_name)
+        )
         return
     end
     display.goto_filename = new_name
@@ -67,8 +72,11 @@ function M.delete_file(fs_t, ask)
         end
         return
     end
-    local prompt =
-        vim.fn.input(string.format("Confirm deletion of (%s) {yes,n(o),q(uit)}: ", fs_t.filename), "yes", "file")
+    local prompt = vim.fn.input(
+        string.format("Confirm deletion of (%s) {yes,n(o),q(uit)}: ", fs_t.filename),
+        "yes",
+        "file"
+    )
     prompt = string.lower(prompt)
     if string.sub(prompt, 1, 3) == "yes" then
         if fs_t.filetype == "directory" then
