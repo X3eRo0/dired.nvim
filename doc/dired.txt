@@ -1,4 +1,4 @@
-*dired.txt*            For NVIM v0.8.0           Last change: 2023 December 07
+*dired.txt*            For NVIM v0.8.0           Last change: 2023 December 10
 
 ==============================================================================
 Table of Contents                                    *dired-table-of-contents*
