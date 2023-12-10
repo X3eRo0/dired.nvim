@@ -8,18 +8,21 @@ local M = {}
 M.path_separator = config.get("path_separator")
 
 function M.rename_file(fs_t)
-    local new_name = vim.fn.input(string.format("Enter New Name (%s): ", fs_t.filename))
-    if new_name == "" then
-        return
-    end
-    local old_path = fs_t.filepath
-    local new_path = fs.join_paths(fs_t.parent_dir, new_name)
-    local success = vim.loop.fs_rename(old_path, new_path)
-    if not success then
-        vim.notify(string.format(' DiredRename: Could not rename "%s" to "%s".', fs_t.filename, new_name))
-        return
-    end
-    display.goto_filename = new_name
+	  local new_name = vim.fn.input({
+	  	  prompt = string.format("Enter New Name (%s): ", fs_t.filename),
+	  	  default = fs_t.filename,
+	  })
+	  if new_name == "" then
+	  	  return
+	  end
+	  local old_path = fs_t.filepath
+	  local new_path = fs.join_paths(fs_t.parent_dir, new_name)
+	  local success = vim.loop.fs_rename(old_path, new_path)
+	  if not success then
+	  	  vim.notify(string.format(' DiredRename: Could not rename "%s" to "%s".', fs_t.filename, new_name))
+	  	  return
+	  end
+	  display.goto_filename = new_name
 end
 
 function M.create_file()
