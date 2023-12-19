@@ -26,6 +26,7 @@ function M.init_dired()
     vim.api.nvim_buf_set_name(0, path) -- 0 is current buffer
 
     vim.bo.filetype = "dired"
+    vim.bo.swapfile = false
     vim.bo.buftype = "acwrite"
     vim.bo.bufhidden = "wipe"
     vim.bo.modifiable = true

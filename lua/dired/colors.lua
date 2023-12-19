@@ -69,7 +69,10 @@ function M.get_filename_color(component)
             return hl.BROKEN_LINK, hl.BROKEN_LINK_TARGET
         end
     else
-        if ut.bitand(fs_t.mode, fs.fs_masks.S_ISUID) > 0 and ut.bitand(fs_t.mode, fs.fs_masks.S_ISGID) > 0 then
+        if
+            ut.bitand(fs_t.mode, fs.fs_masks.S_ISUID) > 0
+            and ut.bitand(fs_t.mode, fs.fs_masks.S_ISGID) > 0
+        then
             -- if file is suid
             return hl.FILE_SUID
         elseif
@@ -97,7 +100,8 @@ function M.get_component_str(component)
         component = component,
         line = string.format(
             "%s %s %s %s %s %s %s %s %s",
-            component.permissions,
+            -- component.permissions,
+            hl.get_highlighted_string(component.permissions, M.get_permission_color()),
             component.nlinks,
             component.owner,
             component.group,

@@ -165,7 +165,8 @@ M.get_faded_highlight_group = function(hl_group_name, fade_percentage)
     local green = (f_green * fade_percentage) + (b_green * (1 - fade_percentage))
     local blue = (f_blue * fade_percentage) + (b_blue * (1 - fade_percentage))
 
-    local new_foreground = string.format("%s%s%s", dec_to_hex(red, 2), dec_to_hex(green, 2), dec_to_hex(blue, 2))
+    local new_foreground =
+        string.format("%s%s%s", dec_to_hex(red, 2), dec_to_hex(green, 2), dec_to_hex(blue, 2))
 
     create_highlight_group(key, {}, hl_group.background, new_foreground, gui)
     faded_highlight_group_cache[key] = key
@@ -212,7 +213,13 @@ M.setup = function()
             clr.DiredFadeText2.gui
         )
 
-        create_highlight_group(M.SIZE, clr.DiredSize.link, clr.DiredSize.bg, clr.DiredSize.fg, clr.DiredSize.gui)
+        create_highlight_group(
+            M.SIZE,
+            clr.DiredSize.link,
+            clr.DiredSize.bg,
+            clr.DiredSize.fg,
+            clr.DiredSize.gui
+        )
         create_highlight_group(
             M.USERNAME,
             clr.DiredUsername.link,
@@ -220,8 +227,20 @@ M.setup = function()
             clr.DiredUsername.fg,
             clr.DiredUsername.gui
         )
-        create_highlight_group(M.MONTH, clr.DiredMonth.link, clr.DiredMonth.bg, clr.DiredMonth.fg, clr.DiredMonth.gui)
-        create_highlight_group(M.DAY, clr.DiredDay.link, clr.DiredDay.bg, clr.DiredDay.fg, clr.DiredDay.gui)
+        create_highlight_group(
+            M.MONTH,
+            clr.DiredMonth.link,
+            clr.DiredMonth.bg,
+            clr.DiredMonth.fg,
+            clr.DiredMonth.gui
+        )
+        create_highlight_group(
+            M.DAY,
+            clr.DiredDay.link,
+            clr.DiredDay.bg,
+            clr.DiredDay.fg,
+            clr.DiredDay.gui
+        )
         create_highlight_group(
             M.FILE_NAME,
             clr.DiredFileName.link,
@@ -306,6 +325,15 @@ M.setup = function()
             clr.DiredMoveFile.fg,
             clr.DiredMoveFile.gui
         )
+    end
+end
+
+function M.get_highlighted_string(str, hl, restore)
+    restore = restore == nil or restore
+    if restore then
+        return table.concat({ "%#", hl or "", "#", str or "", "%*" })
+    else
+        return table.concat({ "%#", hl or "", "#", str or "" })
     end
 end
 
