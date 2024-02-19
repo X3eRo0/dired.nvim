@@ -109,7 +109,7 @@ function M.get_component_str(component)
             component.month,
             component.day,
             component.ftime,
-            -- component.ficon,
+            component.ficon,
             component.filename
         ),
     }
@@ -142,7 +142,7 @@ function M.get_colored_component_str(component)
             nt(component.month, monthcolor),
             nt(component.day, daycolor),
             nt(component.ftime, ftimecolor),
-            -- nt(component.ficon, ftimecolor),
+            nt(component.ficon, ftimecolor),
             nt(component.filename, fcolor_p),
         }
     end
