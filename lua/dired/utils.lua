@@ -253,11 +253,11 @@ end
 
 function M.get_icon_by_filetype(filetype)
     if filetype == "directory" then
-        return "📁"
+        return " "
     elseif filetype == "link" then
-        return "➡️"
+        return "⮕ "
     elseif filetype == "file" then
-        return "📃"
+        return " "
     end
 end
 
