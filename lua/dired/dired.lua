@@ -96,14 +96,73 @@ function M.enter_dir()
     -- with that file
 end
 
+function M.buffer_state(opts)
+    local bufnrs = vim.tbl_filter(function(bufnr)
+        if 1 ~= vim.fn.buflisted(bufnr) then
+            return false
+        end
+        -- only hide unloaded buffers if opts.show_all_buffers is false, keep them listed if true or nil
+        if opts.show_all_buffers == false and not vim.api.nvim_buf_is_loaded(bufnr) then
+            return false
+        end
+        if bufnr == vim.api.nvim_get_current_buf() then
+            return false
+        end
+
+        local bufname = vim.api.nvim_buf_get_name(bufnr)
+
+        if opts.cwd_only and not buf_in_cwd(bufname, vim.loop.cwd()) then
+            return false
+        end
+        if not opts.cwd_only and opts.cwd and not buf_in_cwd(bufname, opts.cwd) then
+            return false
+        end
+        return true
+    end, vim.api.nvim_list_bufs())
+    if not next(bufnrs) then
+        return
+    end
+
+    local buffers = {}
+    local default_selection_idx = 1
+    for _, bufnr in ipairs(bufnrs) do
+        local flag = bufnr == vim.fn.bufnr "" and "%" or (bufnr == vim.fn.bufnr "#" and "#" or " ")
+
+        if opts.sort_lastused and not opts.ignore_current_buffer and flag == "#" then
+            default_selection_idx = 2
+        end
+
+        local element = {
+            bufnr = bufnr,
+            flag = flag,
+        }
+
+        if opts.sort_lastused and (flag == "#" or flag == "%") then
+            local idx = ((buffers[1] ~= nil and buffers[1].flag == "%") and 2 or 1)
+            table.insert(buffers, idx, element)
+        else
+            table.insert(buffers, element)
+        end
+    end
+    return buffers;
+end
+
 -- quit already opened Dired buffer
 function M.quit_buf()
     if vim.bo.filetype ~= "dired" then
         return
     end
 
-    history.pop_path()
-    vim.cmd("bp")
+    local opts    = { sort_lastused = true }
+    local buffers = M.buffer_state(opts)
+    if buffers == nil then
+        return
+    end
+    local cur_buf = buffers[1]
+    if cur_buf == nil or cur_buf.flag ~= "#" then
+        return
+    end
+    vim.api.nvim_set_current_buf(cur_buf.bufnr)
 end
 
 function M.go_back()
