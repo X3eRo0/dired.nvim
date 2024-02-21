@@ -38,6 +38,7 @@ higher.
             require("dired").setup {
                 path_separator = "/",
                 show_banner = false,
+                show_icons = false,
                 show_hidden = true,
                 show_dot_dirs = true,
                 show_colors = true,
@@ -56,8 +57,9 @@ You can require this plugin and use it like this.
     
     -- Set up the 'dired' plugin with custom options
     require("dired").setup({
-        path_separator = "/",               -- Use '/' as the path separator
-        show_hidden = true,                 -- Show hidden files
+        path_separator = "/",                -- Use '/' as the path separator
+        show_hidden = true,                  -- Show hidden files
+        show_icons = false,                  -- Show icons (patched font required)
         show_banner = false,                 -- Do not show the banner
         hide_details = false,                -- Show file details by default
         sort_order = "name",                 -- Sort files by name by default
