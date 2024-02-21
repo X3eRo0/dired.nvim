@@ -253,12 +253,18 @@ end
 
 function M.get_icon_by_filetype(filetype)
     if filetype == "directory" then
-        return "📁"
+        return " "
     elseif filetype == "link" then
-        return "➡️"
+        return "⮕ "
     elseif filetype == "file" then
-        return "📃"
+        return " "
     end
+end
+
+function M.tableLength(table)
+    local count = 0
+    for _ in pairs(table) do count = count + 1 end
+    return count
 end
 
 return M

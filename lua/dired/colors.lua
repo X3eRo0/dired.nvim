@@ -96,23 +96,43 @@ function M.get_component_str(component)
             line = string.format("%s", component.filename),
         }
     end
-    return {
-        component = component,
-        line = string.format(
-            "%s %s %s %s %s %s %s %s %s",
-            -- component.permissions,
-            hl.get_highlighted_string(component.permissions, M.get_permission_color()),
-            component.nlinks,
-            component.owner,
-            component.group,
-            component.size,
-            component.month,
-            component.day,
-            component.ftime,
-            -- component.ficon,
-            component.filename
-        ),
-    }
+
+    if vim.g.dired_show_icons == true then
+        return {
+            component = component,
+            line = string.format(
+                "%s %s %s %s %s %s %s %s %s",
+                -- component.permissions,
+                hl.get_highlighted_string(component.permissions, M.get_permission_color()),
+                component.nlinks,
+                component.owner,
+                component.group,
+                component.size,
+                component.month,
+                component.day,
+                component.ftime,
+                component.ficon,
+                component.filename
+            ),
+        }
+    else
+        return {
+            component = component,
+            line = string.format(
+                "%s %s %s %s %s %s %s %s %s",
+                -- component.permissions,
+                hl.get_highlighted_string(component.permissions, M.get_permission_color()),
+                component.nlinks,
+                component.owner,
+                component.group,
+                component.size,
+                component.month,
+                component.day,
+                component.ftime,
+                component.filename
+            ),
+        }
+    end
 end
 
 function M.get_colored_component_str(component)
@@ -133,18 +153,32 @@ function M.get_colored_component_str(component)
             nt(component.filename, fcolor_p),
         }
     else
-        text_group = {
-            nt(component.permissions, permcolor),
-            nt(component.nlinks, nlinkcolor),
-            nt(component.owner, ownercolor),
-            nt(component.group, groupcolor),
-            nt(component.size, sizecolor),
-            nt(component.month, monthcolor),
-            nt(component.day, daycolor),
-            nt(component.ftime, ftimecolor),
-            -- nt(component.ficon, ftimecolor),
-            nt(component.filename, fcolor_p),
-        }
+        if vim.g.dired_show_icons == true then
+            text_group = {
+                nt(component.permissions, permcolor),
+                nt(component.nlinks, nlinkcolor),
+                nt(component.owner, ownercolor),
+                nt(component.group, groupcolor),
+                nt(component.size, sizecolor),
+                nt(component.month, monthcolor),
+                nt(component.day, daycolor),
+                nt(component.ftime, ftimecolor),
+                nt(component.ficon, ftimecolor),
+                nt(component.filename, fcolor_p),
+            }
+        else
+            text_group = {
+                nt(component.permissions, permcolor),
+                nt(component.nlinks, nlinkcolor),
+                nt(component.owner, ownercolor),
+                nt(component.group, groupcolor),
+                nt(component.size, sizecolor),
+                nt(component.month, monthcolor),
+                nt(component.day, daycolor),
+                nt(component.ftime, ftimecolor),
+                nt(component.filename, fcolor_p),
+            }
+        end
     end
 
     if component.fs_t.filetype == "link" then

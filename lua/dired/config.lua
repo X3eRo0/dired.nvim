@@ -28,6 +28,14 @@ local CONFIG_SPEC = {
             end
         end,
     },
+    show_icons = {
+        default = false,
+        check = function(val)
+            if type(val) ~= "boolean" then
+                return "Must be boolean, instead received " .. type(val)
+            end
+        end,
+    },
     hide_details = {
         default = false,
         check = function(val)

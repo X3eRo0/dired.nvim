@@ -159,7 +159,14 @@ function M.get_filename_from_listing(line)
     for i = idx, #splitted do
         table.insert(filename, splitted[i])
     end
-    return table.concat(filename, " ")
+
+    -- Detect if there is an icon in the "extracted" filename table.
+    if utils.tableLength(filename) > 1 then
+        -- Allways get the last bit of the table. The actual filename.
+        return filename[utils.tableLength(filename)]
+    else
+        return table.concat(filename, " ")
+    end
 end
 
 return M
