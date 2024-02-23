@@ -1,6 +1,7 @@
 -- ls implementation in lua
 
 local utils = require("dired.utils")
+local filetype_module = require("dired.filetype")
 local fs = require("dired.fs")
 local M = {}
 M.fs_entry = {}
@@ -128,8 +129,8 @@ function fs_entry.get_directory(directory)
             break
         end
 
-        -- get fullpath of the file.
-        fs_t, error = fs_entry.new(filename, directory, filetype)
+        local proper_filetype = filetype_module.get_filetype(filename, filetype)
+        fs_t, error = fs_entry.new(filename, directory, proper_filetype)
         if fs_t == nil then
             return nil, error
         end
@@ -204,7 +205,7 @@ function fs_entry.format(dir_files, show_dot_dirs, show_hidden, hide_details)
                     month = utils.get_month(fs_t.stat),
                     day = utils.get_day(fs_t.stat),
                     ftime = utils.get_ftime(fs_t.stat),
-                    ficon = utils.get_icon_by_filetype(fs_t.filetype),
+                    ficon = filetype_module.get_icon_by_filetype(fs_t.filetype),
                     filename = fs_t.filename,
                 }
 

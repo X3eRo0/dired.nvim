@@ -251,16 +251,6 @@ function M.shallowcopy(orig)
     return copy
 end
 
-function M.get_icon_by_filetype(filetype)
-    if filetype == "directory" then
-        return " "
-    elseif filetype == "link" then
-        return "⮕ "
-    elseif filetype == "file" then
-        return " "
-    end
-end
-
 function M.tableLength(table)
     local count = 0
     for _ in pairs(table) do count = count + 1 end
