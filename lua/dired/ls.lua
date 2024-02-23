@@ -129,7 +129,10 @@ function fs_entry.get_directory(directory)
             break
         end
 
+        -- get file type of the file 
         local proper_filetype = filetype_module.get_filetype(filename, filetype)
+
+        -- get fullpath of the file
         fs_t, error = fs_entry.new(filename, directory, proper_filetype)
         if fs_t == nil then
             return nil, error
