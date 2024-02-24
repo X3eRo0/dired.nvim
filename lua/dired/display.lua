@@ -37,6 +37,10 @@ function M.flush_buffer()
     else
         vim.api.nvim_buf_set_lines(0, 0, -1, true, M.buffer)
     end
+
+    -- Move the cursor to the right end of a file name. This makes file icons and names
+    -- more visible. This is actually the default cursor behavior in nvim-tree.lua.
+    M.cursor_pos[2] = string.len(vim.fn.getline(5));
     vim.bo.undolevels = undolevels
     vim.api.nvim_win_set_cursor(0, M.cursor_pos)
     vim.bo.modified = false
