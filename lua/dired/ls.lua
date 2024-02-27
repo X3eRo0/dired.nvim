@@ -129,7 +129,7 @@ function fs_entry.get_directory(directory)
             break
         end
 
-        -- get file type of the file 
+        -- get file type of the file
         local proper_filetype = filetype_module.get_filetype(filename, filetype)
 
         -- get fullpath of the file
@@ -150,7 +150,7 @@ function fs_entry.get_directory(directory)
 end
 
 -- function to format each component
-function fs_entry.format(dir_files, show_dot_dirs, show_hidden, hide_details)
+function fs_entry.format(dir_files, show_dot_dirs, show_hidden, hide_details, show_icon)
     -- components :
     --  1. permissions
     --  2. # of links
@@ -261,6 +261,10 @@ function fs_entry.format(dir_files, show_dot_dirs, show_hidden, hide_details)
 
     if not hide_details then
         cursor_x = cursor_x + 8
+    end
+
+    if show_icon then
+        cursor_x = cursor_x + 1
     end
 
     if not hide_details then

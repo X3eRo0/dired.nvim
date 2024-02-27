@@ -38,9 +38,6 @@ function M.flush_buffer()
         vim.api.nvim_buf_set_lines(0, 0, -1, true, M.buffer)
     end
 
-    -- Move the cursor to the right end of a file name. This makes file icons and names
-    -- more visible. This is actually the default cursor behavior in nvim-tree.lua.
-    M.cursor_pos[2] = string.len(vim.fn.getline(5));
     vim.bo.undolevels = undolevels
     vim.api.nvim_win_set_cursor(0, M.cursor_pos)
     vim.bo.modified = false
@@ -72,8 +69,13 @@ function M.get_directory_listing(directory)
         info1 = string.format("%s:", fs.get_simplified_path(directory))
         info2 = string.format("total used in directory %s:", dir_size_str)
     end
-    local formatted_components, cursor_x =
-        ls.fs_entry.format(dir_files, vim.g.dired_show_dot_dirs, vim.g.dired_show_hidden, vim.g.dired_hide_details)
+    local formatted_components, cursor_x = ls.fs_entry.format(
+        dir_files,
+        vim.g.dired_show_dot_dirs,
+        vim.g.dired_show_hidden,
+        vim.g.dired_hide_details,
+        vim.g.dired_show_icons
+    )
     table.insert(buffer_listing, { component = nil, line = info1 })
     table.insert(buffer_listing, { component = nil, line = info2 })
 
