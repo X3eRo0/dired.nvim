@@ -102,6 +102,7 @@ You can use the following commands to add in your custom keybinds.
 | DiredToggleHidden    | Toggle the visibility of hidden files                  |
 | DiredToggleSortOrder  | Toggle the sorting order of files and directories      |
 | DiredToggleColors    | Toggle the display of colors                            |
+| DiredToggleIcons     | Toggle the display of filetype icons                    |
 | DiredToggleHideDetails| Toggle hiding/showing file details                      |
 | DiredQuit            | Quit the 'dired' interface                              |
 
@@ -127,6 +128,7 @@ Inside a directory buffer, there are the following keybindings:
 | **`c`**| Toggle colors.                                    |
 | **`_`**| Move selection up one line.                       |
 | **`,`**| Toggle color display.                             |
+| **`*`**| Toggle filetype icons.                            |
 | **`(`**| Toggle hiding/showing file details.               |
 | **`q`**| Quit the 'dired' interface.                       |
 
@@ -152,6 +154,7 @@ The default keybinds are given below.
     dired_delete_marked = "MD",
     dired_toggle_hidden = ".",
     dired_toggle_sort_order = ",",
+    dired_toggle_icons = "*",
     dired_toggle_colors = "c",
     dired_toggle_hide_details = "(",
     dired_quit = "q",
