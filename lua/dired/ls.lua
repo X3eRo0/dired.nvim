@@ -53,15 +53,27 @@ function M.get_permission_str(mode)
     local other = rwx[1 + utils.bitand(mode, 7)]
 
     if utils.bitand(mode, fs.fs_masks.S_ISUID) > 0 then
-        user = utils.replace_char(3, user, (utils.bitand(mode, fs.fs_masks.S_IXUSR) > 0) and "s" or "S")
+        user = utils.replace_char(
+            3,
+            user,
+            (utils.bitand(mode, fs.fs_masks.S_IXUSR) > 0) and "s" or "S"
+        )
     end
 
     if utils.bitand(mode, fs.fs_masks.S_ISGID) > 0 then
-        group = utils.replace_char(3, group, (utils.bitand(mode, fs.fs_masks.S_IXGRP) > 0) and "s" or "l")
+        group = utils.replace_char(
+            3,
+            group,
+            (utils.bitand(mode, fs.fs_masks.S_IXGRP) > 0) and "s" or "l"
+        )
     end
 
     if utils.bitand(mode, fs.fs_masks.S_ISVTX) > 0 then
-        other = utils.replace_char(3, other, (utils.bitand(mode, fs.fs_masks.S_IXOTH) > 0) and "t" or "T")
+        other = utils.replace_char(
+            3,
+            other,
+            (utils.bitand(mode, fs.fs_masks.S_IXOTH) > 0) and "t" or "T"
+        )
     end
 
     table.insert(access_string, user)
@@ -264,7 +276,7 @@ function fs_entry.format(dir_files, show_dot_dirs, show_hidden, hide_details, sh
     end
 
     if show_icon then
-        cursor_x = cursor_x + 1
+        cursor_x = cursor_x + 5
     end
 
     if not hide_details then
