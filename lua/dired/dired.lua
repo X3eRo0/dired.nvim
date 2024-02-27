@@ -115,7 +115,7 @@ function M.buffer_state(opts)
     local buffers = {}
     local default_selection_idx = 1
     for _, bufnr in ipairs(bufnrs) do
-        local flag = bufnr == vim.fn.bufnr "" and "%" or (bufnr == vim.fn.bufnr "#" and "#" or " ")
+        local flag = bufnr == vim.fn.bufnr("") and "%" or (bufnr == vim.fn.bufnr("#") and "#" or " ")
 
         if opts.sort_lastused and not opts.ignore_current_buffer and flag == "#" then
             default_selection_idx = 2
@@ -133,7 +133,7 @@ function M.buffer_state(opts)
             table.insert(buffers, element)
         end
     end
-    return buffers;
+    return buffers
 end
 
 -- quit already opened Dired buffer
@@ -142,7 +142,7 @@ function M.quit_buf()
         return
     end
 
-    local opts    = { sort_lastused = true }
+    local opts = { sort_lastused = true }
     local buffers = M.buffer_state(opts)
     if buffers == nil then
         return
@@ -170,6 +170,14 @@ function M.toggle_hidden_files()
     display.cursor_pos = {}
     vim.g.dired_show_hidden = not vim.g.dired_show_hidden
     vim.notify(string.format("dired_show_hidden: %s", vim.inspect(vim.g.dired_show_hidden)))
+    M.init_dired()
+end
+
+-- toggle between showing icons
+function M.toggle_show_icons()
+    display.cursor_pos = {}
+    vim.g.dired_show_icons = not vim.g.dired_show_icons
+    vim.notify(string.format("dired_show_icons: %s", vim.inspect(vim.g.dired_show_icons)))
     M.init_dired()
 end
 

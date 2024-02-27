@@ -24,6 +24,7 @@ M.mark_range = dired.mark_file_range
 M.delete_marked = dired.delete_marked
 M.toggle_hidden_files = dired.toggle_hidden_files
 M.toggle_sort_order = dired.toggle_sort_order
+M.toggle_show_icons = dired.toggle_show_icons
 M.toggle_colors = dired.toggle_colors
 M.toggle_hide_details = dired.toggle_hide_details
 
@@ -111,6 +112,7 @@ function M.setup(opts)
     vim.cmd([[command! DiredToggleHidden lua require'dired'.toggle_hidden_files()]])
     vim.cmd([[command! DiredToggleSortOrder lua require'dired'.toggle_sort_order()]])
     vim.cmd([[command! DiredToggleColors lua require'dired'.toggle_colors()]])
+    vim.cmd([[command! DiredToggleIcons lua require'dired'.toggle_show_icons()]])
     vim.cmd([[command! DiredToggleHideDetails lua require'dired'.toggle_hide_details()]])
     vim.cmd([[command! DiredQuit lua require'dired'.quit()]])
 
@@ -137,6 +139,7 @@ function M.setup(opts)
     map("", "<Plug>(dired_toggle_hidden)", ":DiredToggleHidden<cr>", opt)
     map("", "<Plug>(dired_toggle_sort_order)", ":DiredToggleSortOrder<cr>", opt)
     map("", "<Plug>(dired_toggle_colors)", ":DiredToggleColors<cr>", opt)
+    map("", "<Plug>(dired_toggle_icons)", ":DiredToggleIcons<cr>", opt)
     map("", "<Plug>(dired_toggle_hide_details)", ":DiredToggleHideDetails<cr>", opt)
     map("", "<Plug>(dired_quit)", ":DiredQuit<cr>", opt)
 
@@ -172,6 +175,7 @@ function M.setup(opts)
             map(0, "n", config.get("keybinds").dired_toggle_hidden, "<Plug>(dired_toggle_hidden)", opt)
             map(0, "n", config.get("keybinds").dired_toggle_sort_order, "<Plug>(dired_toggle_sort_order)", opt)
             map(0, "n", config.get("keybinds").dired_toggle_colors, "<Plug>(dired_toggle_colors)", opt)
+            map(0, "n", config.get("keybinds").dired_toggle_icons, "<Plug>(dired_toggle_icons)", opt)
             map(0, "n", config.get("keybinds").dired_toggle_hide_details, "<Plug>(dired_toggle_hide_details)", opt)
             map(0, "n", config.get("keybinds").dired_quit, "<Plug>(dired_quit)", opt)
         end,
