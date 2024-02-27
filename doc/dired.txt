@@ -145,6 +145,8 @@ You can use the following commands to add in your custom keybinds.
 
   DiredToggleColors        Toggle the display of colors
 
+  DiredToggleIcons         Toggle the display of filetype icons
+
   DiredToggleHideDetails   Toggle hiding/showing file details
 
   DiredQuit                Quit the ‘dired’ interface
@@ -164,8 +166,9 @@ Paste files in the current directory. | | **D**| Delete directories and files
 **MD**| Delete marked files. | | **MC**| Copy marked files. | | **MX**| Move
 marked files. | | **-**| Open the parent directory. | | **.**| Toggle
 show_hidden. | | **,**| Change sort_order. | | **c**| Toggle colors. | | **_**|
-Move selection up one line. | | **,**| Toggle color display. | | **(**| Toggle
-hiding/showing file details. | | **q**| Quit the 'dired' interface. |
+Move selection up one line. | | **,**| Toggle color display. | | *****| Toggle
+filetype icons. | | **(**| Toggle hiding/showing file details. | | **q**| Quit
+the 'dired' interface. |
 
 The default keybinds are given below.
 
@@ -190,6 +193,7 @@ The default keybinds are given below.
         dired_delete_marked = "MD",
         dired_toggle_hidden = ".",
         dired_toggle_sort_order = ",",
+        dired_toggle_icons = "*",
         dired_toggle_colors = "c",
         dired_toggle_hide_details = "(",
         dired_quit = "q",
