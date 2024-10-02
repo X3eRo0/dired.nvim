@@ -166,8 +166,7 @@ function M.get_filename_from_listing(line)
         table.insert(filename, splitted[i])
     end
 
-    -- Detect if icons have been enabled is an icon in the "extracted" filename table.
-    -- BUG: the old implementation didn't take into account filenames with spaces
+    -- BUG: the old implementation didn't take into account filenames with spaces, I haven't tested anything
     if vim.g.dired_show_icons == true then
         table.remove(filename, 1)
     end
