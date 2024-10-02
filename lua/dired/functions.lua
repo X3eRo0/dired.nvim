@@ -1,7 +1,6 @@
 local fs = require("dired.fs")
 local config = require("dired.config")
 local display = require("dired.display")
-local utils = require("dired.utils")
 
 local M = {}
 
