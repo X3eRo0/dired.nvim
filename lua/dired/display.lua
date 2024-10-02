@@ -166,13 +166,12 @@ function M.get_filename_from_listing(line)
         table.insert(filename, splitted[i])
     end
 
-    -- Detect if there is an icon in the "extracted" filename table.
-    if utils.tableLength(filename) > 1 then
-        -- Allways get the last bit of the table. The actual filename.
-        return filename[utils.tableLength(filename)]
-    else
-        return table.concat(filename, " ")
+    -- BUG: the old implementation didn't take into account filenames with spaces, I haven't tested anything
+    if vim.g.dired_show_icons == true then
+        table.remove(filename, 1)
     end
+    return table.concat(filename, " ")
 end
+
 
 return M
