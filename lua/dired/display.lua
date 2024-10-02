@@ -152,6 +152,16 @@ function M.display_dired_listing(directory)
     M.buffer = utils.concatenate_tables(M.buffer, buffer_listings)
 end
 
+local function remove_empty_strings(t)
+    local output = {}
+    for _, s in ipairs(t) do
+        if s ~= "" then
+            table.insert(output, s)
+        end
+    end
+    return output
+end
+
 function M.get_filename_from_listing(line)
     local splitted = utils.str_split(line, " ", true)
     local filename = {}
@@ -170,8 +180,8 @@ function M.get_filename_from_listing(line)
     if vim.g.dired_show_icons == true then
         table.remove(filename, 1)
     end
+    filename = remove_empty_strings(filename)
     return table.concat(filename, " ")
 end
-
 
 return M
