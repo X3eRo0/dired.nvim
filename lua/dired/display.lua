@@ -163,21 +163,27 @@ local function remove_empty_strings(t)
 end
 
 function M.get_filename_from_listing(line)
-	local columns = 9
+	local columns = 8
 	if vim.g.dired_show_icons == true then
-		columns = 10
+		columns = 9
 	end
 	local n = 0
 	local i = 1
 	while n < columns do
 		local start_pos, end_pos = line:find("%S+", i)
 		if not start_pos then
-			vim.api.nvim_err_writeln(string.format("Dired: formatting error (%d columns expected, got %d)", columns, n))
+			vim.api.nvim_err_writeln(string.format("Dired: formatting error (%d columns expected, got %d)", columns+1, n))
 			return nil
 		end
 		n = n + 1
 		if n == columns then
-			return line:sub(start_pos)
+			-- Handle filenames that start with a space
+			local next = line:find("%s", end_pos)
+			if(vim.g.dired_show_icons == true) then
+				return line:sub(next+2)
+			else
+				return line:sub(next+1)
+			end
 		end
 		i = end_pos + 1
 	end
