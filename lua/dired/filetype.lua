@@ -482,7 +482,7 @@ function M.get_icon_by_filetype(filetype)
     elseif filetype == "tsx" then
         return " "
     elseif filetype == "nix" then
-        return "'"
+        return " "
     elseif filetype == "shell" then
         return " "
     elseif filetype == "zsh" then
